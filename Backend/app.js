@@ -2,6 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { getDB } from "./config/db.js";
+import { sentryMiddleware, requestTrackingMiddleware, performanceMiddleware, errorContextMiddleware, complianceMiddleware } from "./middleware/sentry.js";
+import { performanceTrackingMiddleware } from "./config/performance.js";
+import complianceRoutes from "./routes/compliance/ComplianceRoutes.js";
 
 // #region ImportRoutes
 import authRoutes from "./routes/auth/AuthRoutes.js";
@@ -27,6 +30,7 @@ import publicBloodBankRoutes from "./routes/BloodBankRoutes.js";  // ← Public 
 import publicNgoRoutes from "./routes/NgoPublicRoutes.js";  // ← Public NGOs
 import debugRoutes from "./routes/DebugRoutes.js";  // ← Debug routes
 import syncRoutes from "./routes/SyncRoutes.js";  // ← Sync routes
+import monitoringRoutes from "./routes/monitoring/MonitoringRoutes.js";  // ← Monitoring routes
 
 
 // #region ImportMiddleware
@@ -48,6 +52,13 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// #region Monitoring & Tracking Middleware
+app.use(requestTrackingMiddleware);
+app.use(performanceMiddleware);
+app.use(performanceTrackingMiddleware);
+app.use(complianceMiddleware);
+app.use(errorContextMiddleware);
+
 // #region RequestLogging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -56,10 +67,35 @@ app.use((req, res, next) => {
 
 // #region HealthCheck
 app.get("/health", (req, res) => {
+  const db = getDB();
+  let dbStatus = 'disconnected';
+  
+  try {
+    // Check database connection
+    if (db) {
+      dbStatus = 'connected';
+    }
+  } catch (error) {
+    dbStatus = 'error';
+  }
+  
   res.json({
     status: "OK",
     message: "SEBN Backend is running 🚀",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    requestId: req.requestId,
+    environment: process.env.NODE_ENV || 'development',
+    database: {
+      status: dbStatus,
+      type: 'mongodb'
+    },
+    monitoring: {
+      sentry: !!process.env.SENTRY_DSN,
+      logging: true
+    },
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: process.env.npm_package_version || '1.0.0'
   });
 });
 
@@ -298,6 +334,12 @@ app.use("/api/donor", donorRoutes);
 app.use("/api/debug", debugRoutes);  // ← Debug routes (development only)
 app.use("/api/sync", syncRoutes);  // ← Sync routes (development only)
 
+// #region MonitoringRoutes
+app.use("/api/monitoring", monitoringRoutes);
+
+// #region ComplianceRoutes
+app.use("/api/compliance", complianceRoutes);
+
 // #region ErrorHandling
 
 // #region NotFoundHandler
@@ -310,6 +352,7 @@ app.use((req, res) => {
 });
 
 // #region GlobalErrorHandler
+app.use(sentryMiddleware);
 app.use((err, req, res, next) => {
   console.error("Error:", err);
   const statusCode = err.statusCode || 500;
@@ -318,6 +361,8 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({
     success: false,
     message,
+    requestId: req.requestId,
+    timestamp: new Date().toISOString(),
     ...(process.env.NODE_ENV === "development" && { stack: err.stack })
   });
 });

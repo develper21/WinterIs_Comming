@@ -252,7 +252,22 @@ quick-start:
 	@echo "🔧 Backend API: http://localhost:3000"
 	@echo "📝 Logs: make logs"
 
-# Auto-scaling
+# CDN setup
+cdn:setup:
+	@echo "Setting up CDN..."
+	./scripts/cdn-setup.sh $(DOMAIN) $(CDN_DOMAIN) $(ENVIRONMENT)
+
+cdn:deploy:
+	@echo "Deploying CDN..."
+	cd cdn && ./deploy.sh
+
+cdn:monitor:
+	@echo "Monitoring CDN..."
+	cd cdn && ./monitor.sh
+
+cdn:optimize:
+	@echo "Optimizing CDN assets..."
+	cd cdn && ./optimize-assets.sh
 autoscale:status:
 	@echo "Checking auto-scaling status..."
 	./scripts/autoscaling.sh status

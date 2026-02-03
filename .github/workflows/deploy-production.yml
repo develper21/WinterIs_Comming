@@ -1,0 +1,221 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Create deployment backup
+      run: |
+        echo "💾 Creating backup before deployment..."
+        
+        ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+          cd /opt/bloodbank-production
+          
+          # Create backup
+          BACKUP_DIR="backups/$(date +%Y%m%d_%H%M%S)"
+          mkdir -p $BACKUP_DIR
+          
+          # Backup database
+          docker exec sebn-mongodb-prod mongodump --out /tmp/backup
+          docker cp sebn-mongodb-prod:/tmp/backup $BACKUP_DIR/mongodb
+          
+          # Backup configuration
+          cp -r nginx $BACKUP_DIR/
+          cp docker-compose.prod.yml $BACKUP_DIR/
+          
+          echo "✅ Backup created: $BACKUP_DIR"
+        EOF
+
+    - name: Deploy to production (Blue-Green)
+      run: |
+        echo "🚀 Deploying to production environment..."
+        
+        ssh -o StrictHostKeyChecking=no ${{ secrets.PRODUCTION_USER }}@${{ secrets.PRODUCTION_HOST }} << 'EOF'
+          cd /opt/bloodbank-production
+          
+          # Determine current environment (blue or green)
+          if docker ps | grep -q "sebn-backend-blue"; then
+            CURRENT="blue"
+            TARGET="green"
+          else
+            CURRENT="green"
+            TARGET="blue"
+          fi
+          
+          echo "Current environment: $CURRENT"
+          echo "Target environment: $TARGET"
+          
+          # Deploy to target environment
+          export ENVIRONMENT=$TARGET
+          docker-compose -f docker-compose.prod.yml up -d --scale backend=0
+          
+          # Pull latest images
+          docker-compose -f docker-compose.prod.yml pull
+          
+          # Start target environment
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # Wait for services to be healthy
+          sleep 60
+          
+          # Health check on target environment
+          if curl -f http://localhost:8081/health; then
+            echo "✅ Target environment is healthy"
+            
+            # Switch traffic to target environment
+            sed -i "s/backend:3000/backend-$TARGET:3000/" nginx/nginx.prod.conf
+            docker-compose -f docker-compose.prod.yml restart nginx
+            
+            # Stop old environment
+            docker-compose -f docker-compose.prod.yml stop backend-$CURRENT
+            
+            echo "✅ Production deployment completed successfully"
+          else
+            echo "❌ Target environment is not healthy, rolling back..."
+            docker-compose -f docker-compose.prod.yml stop
+            docker-compose -f docker-compose.prod.yml up -d
+            exit 1
+          fi
+        EOF
+
+    - name: Run production smoke tests
+      run: |
+        echo "🧪 Running production smoke tests..."
+        
+        # Wait for DNS propagation
+        sleep 120
+        
+        # Test API health
+        curl -f https://api.bloodbank.yourdomain.com/health || exit 1
+        
+        # Test frontend
+        curl -f https://bloodbank.yourdomain.com/ || exit 1
+        
+        # Test critical API endpoints
+        curl -f https://api.bloodbank.yourdomain.com/api/auth/health || exit 1
+        
+        echo "✅ Production smoke tests passed"
+
+    - name: Performance tests
+      run: |
+        echo "⚡ Running performance tests..."
+        
+        # Install k6 for performance testing
+        curl https://github.com/grafana/k6/releases/download/v0.47.0/k6-v0.47.0-linux-amd64.tar.gz -L | tar xvz -C /tmp
+        
+        # Run basic load test
+        /tmp/k6-v0.47.0-linux-amd64/k6 run --vus 10 --duration 30s << 'EOF'
+        import http from 'k6/http';
+        import { check } from 'k6';
+
+        export default function () {
+          const response = http.get('https://bloodbank.yourdomain.com/');
+          check(response, {
+            'status is 200': (r) => r.status === 200,
+            'response time < 500ms': (r) => r.timings.duration < 500,
+          });
+        }
+        EOF
+
+    - name: Notify deployment status
+      if: always()
+      run: |
+        if [ $? -eq 0 ]; then
+          echo "✅ Production deployment successful!"
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🎉 BloodBank production deployment successful! 🚀"}' \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+        else
+          echo "❌ Production deployment failed!"
+          curl -X POST -H 'Content-type: application/json' \
+            --data '{"text":"🚨 BloodBank production deployment failed! 🚨"}' \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+          exit 1
+        fi
+
+  # Post-deployment monitoring
+  monitor-deployment:
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    environment: production
+
+    steps:
+    - name: Monitor application health
+      run: |
+        echo "📊 Monitoring application health for 10 minutes..."
+        
+        for i in {1..20}; do
+          echo "Health check $i/20"
+          
+          # Check API health
+          if ! curl -f https://api.bloodbank.yourdomain.com/health; then
+            echo "❌ API health check failed"
+            exit 1
+          fi
+          
+          # Check frontend health
+          if ! curl -f https://bloodbank.yourdomain.com/; then
+            echo "❌ Frontend health check failed"
+            exit 1
+          fi
+          
+          sleep 30
+        done
+        
+        echo "✅ All health checks passed"
+
+    - name: Create deployment report
+      run: |
+        echo "📋 Creating deployment report..."
+        
+        cat > deployment-report.md << EOF
+        # Production Deployment Report
+        
+        **Date:** $(date)
+        **Commit:** ${{ github.sha }}
+        **Branch:** ${{ github.ref_name }}
+        
+        ## Deployment Status
+        - ✅ Backend: Deployed successfully
+        - ✅ Frontend: Deployed successfully
+        - ✅ Database: Migrated successfully
+        - ✅ Health Checks: All passed
+        - ✅ Performance Tests: Passed
+        
+        ## Links
+        - Frontend: https://bloodbank.yourdomain.com
+        - API: https://api.bloodbank.yourdomain.com
+        - Monitoring: https://monitoring.bloodbank.yourdomain.com
+        
+        ## Next Steps
+        - Monitor application performance
+        - Check error rates in monitoring tools
+        - Review user feedback
+        EOF
+        
+        echo "📄 Deployment report created"

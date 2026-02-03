@@ -1,0 +1,240 @@
+name: Load Testing
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'Backend/**'
+      - 'tests/load/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'Backend/**'
+      - 'tests/load/**'
+  schedule:
+    # Run load tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  # Install k6
+  setup-k6:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+  # Smoke test
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: setup-k6
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Start application
+      run: |
+        echo "Starting application for smoke test..."
+        # Start backend in background
+        cd Backend && npm ci && npm run dev &
+        # Wait for application to start
+        sleep 30
+
+    - name: Run smoke test
+      run: |
+        k6 run --vus 10 --duration 30s tests/load/smoke-test.js
+      env:
+        BASE_URL: http://localhost:3000
+
+    - name: Upload smoke test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: smoke-test-results
+        path: |
+          smoke-test-results.json
+          k6-report.html
+
+  # API load test
+  api-load-test:
+    runs-on: ubuntu-latest
+    needs: setup-k6
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Start application
+      run: |
+        echo "Starting application for API load test..."
+        cd Backend && npm ci && npm run dev &
+        sleep 30
+
+    - name: Run API load test
+      run: |
+        k6 run tests/load/api-load-test.js --out json=api-load-test-results.json
+      env:
+        BASE_URL: http://localhost:3000
+
+    - name: Upload API load test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: api-load-test-results
+        path: |
+          api-load-test-results.json
+          k6-report.html
+
+    - name: Analyze load test results
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          try {
+            const results = JSON.parse(fs.readFileSync('api-load-test-results.json', 'utf8'));
+            
+            const avgResponseTime = results.metrics.http_req_duration.avg;
+            const p95ResponseTime = results.metrics.http_req_duration['p(95)'];
+            const errorRate = results.metrics.http_req_failed.rate;
+            
+            const summary = `
+            ## 📊 API Load Test Results
+            
+            **Average Response Time:** ${avgResponseTime.toFixed(2)}ms
+            **95th Percentile:** ${p95ResponseTime.toFixed(2)}ms
+            **Error Rate:** ${(errorRate * 100).toFixed(2)}%
+            **Total Requests:** ${results.metrics.requests.count}
+            
+            **Performance Status:** ${errorRate < 0.05 && p95ResponseTime < 2000 ? '✅ PASS' : '❌ FAIL'}
+            
+            ---
+            *Automated load test results*
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number || 1,
+              body: summary
+            });
+          } catch (error) {
+            console.log('Could not analyze load test results:', error.message);
+          }
+
+  # Stress test (only on schedule or manual)
+  stress-test:
+    runs-on: ubuntu-latest
+    needs: setup-k6
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Start application
+      run: |
+        echo "Starting application for stress test..."
+        cd Backend && npm ci && npm run dev &
+        sleep 30
+
+    - name: Run stress test
+      run: |
+        k6 run tests/load/stress-test.js --out json=stress-test-results.json
+      env:
+        BASE_URL: http://localhost:3000
+
+    - name: Upload stress test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: stress-test-results
+        path: |
+          stress-test-results.json
+          k6-report.html
+
+    - name: Send notification
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: '🚨 Stress Test Failed',
+            body: 'The scheduled stress test has failed. Please check the artifacts for detailed results.',
+            labels: ['stress-test', 'performance', 'failed']
+          });
+
+  # Soak test (only on schedule)
+  soak-test:
+    runs-on: ubuntu-latest
+    needs: setup-k6
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install k6
+      run: |
+        sudo gpg -k
+        sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+
+    - name: Start application
+      run: |
+        echo "Starting application for soak test..."
+        cd Backend && npm ci && npm run dev &
+        sleep 30
+
+    - name: Run soak test
+      run: |
+        k6 run tests/load/soak-test.js --out json=soak-test-results.json
+      env:
+        BASE_URL: http://localhost:3000
+
+    - name: Upload soak test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: soak-test-results
+        path: |
+          soak-test-results.json
+          k6-report.html

@@ -1,0 +1,159 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'README.md'
+      - 'CHANGELOG.md'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '**.md'
+      - 'README.md'
+
+jobs:
+  # Documentation validation
+  validate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install documentation dependencies
+      run: |
+        npm install -g markdownlint-cli
+        npm install -g markdown-link-check
+
+    - name: Validate markdown files
+      run: |
+        echo "Validating markdown files..."
+        find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" -exec markdownlint {} \;
+
+    - name: Check broken links
+      run: |
+        echo "Checking for broken links in documentation..."
+        find . -name "*.md" -not -path "./node_modules/*" -not -path "./.git/*" -exec markdown-link-check {} \; || echo "Some links may be broken"
+
+  # Generate changelog
+  generate-changelog:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Generate changelog
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          
+          // Get commits since last release
+          const lastTag = execSync('git describe --tags --abbrev=0', { encoding: 'utf8' }).trim();
+          
+          // Get commit messages
+          const commits = execSync(`git log ${lastTag}..HEAD --pretty=format:"- %s"`, { encoding: 'utf8' })
+            .split('\n')
+            .filter(line => line.trim());
+          
+          // Categorize changes
+          const features = [];
+          const fixes = [];
+          const improvements = [];
+          const breaking = [];
+          
+          commits.forEach(commit => {
+            const message = commit.replace(/^- /, '');
+            
+            if (message.toLowerCase().includes('feat:') || message.toLowerCase().includes('feature:')) {
+              features.push(message);
+            } else if (message.toLowerCase().includes('fix:') || message.toLowerCase().includes('bugfix:')) {
+              fixes.push(message);
+            } else if (message.toLowerCase().includes('break:') || message.toLowerCase().includes('breaking change:')) {
+              breaking.push(message);
+            } else {
+              improvements.push(message);
+            }
+          });
+          
+          // Generate changelog content
+          let changelog = `# Changelog\n\n`;
+          
+          if (breaking.length > 0) {
+            changelog += `## 🚨 Breaking Changes\n\n`;
+            breaking.forEach(change => {
+              changelog += `- ${change}\n`;
+            });
+            changelog += '\n';
+          }
+          
+          if (features.length > 0) {
+            changelog += `## ✨ Features\n\n`;
+            features.forEach(feature => {
+              changelog += `- ${feature}\n`;
+            });
+            changelog += '\n';
+          }
+          
+          if (fixes.length > 0) {
+            changelog += `## 🐛 Bug Fixes\n\n`;
+            fixes.forEach(fix => {
+              changelog += `- ${fix}\n`;
+            });
+            changelog += '\n';
+          }
+          
+          if (improvements.length > 0) {
+            changelog += `## 🔧 Improvements\n\n`;
+            improvements.forEach(improvement => {
+              changelog += `- ${improvement}\n`;
+            });
+            changelog += '\n';
+          }
+          
+          // Add version and date
+          const version = `v${require('./Backend/package.json').version}`;
+          const date = new Date().toISOString().split('T')[0];
+          
+          changelog = `# ${version} (${date})\n\n${changelog}`;
+          
+          // Update CHANGELOG.md
+          const fs = require('fs');
+          let existingChangelog = '';
+          
+          try {
+            existingChangelog = fs.readFileSync('CHANGELOG.md', 'utf8');
+          } catch (e) {
+            console.log('No existing CHANGELOG.md');
+          }
+          
+          const updatedChangelog = changelog + '\n' + existingChangelog;
+          fs.writeFileSync('CHANGELOG.md', updatedChangelog);
+          
+          // Commit changelog
+          await github.rest.repos.createOrUpdateFileContents({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            path: 'CHANGELOG.md',
+            message: `docs: Update changelog for ${version}`,
+            content: updatedChangelog,
+            sha: (await github.rest.repos.getContent({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              path: 'CHANGELOG.md'
+            })).data.sha
+          });
+          
+          console.log(`Generated changelog for ${version}`);

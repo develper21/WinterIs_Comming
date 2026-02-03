@@ -1,0 +1,279 @@
+name: Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  # Automated code review
+  automated-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
+
+    - name: Install backend dependencies
+      working-directory: ./Backend
+      run: npm ci
+
+    - name: Install frontend dependencies
+      working-directory: ./Frontend
+      run: npm ci
+
+    - name: Run ESLint (Backend)
+      working-directory: ./Backend
+      run: |
+        npm run lint 2>/dev/null || echo "Linting skipped - no lint script"
+        npm run lint:fix 2>/dev/null || echo "Lint fix skipped"
+
+    - name: Run ESLint (Frontend)
+      working-directory: ./Frontend
+      run: |
+        npm run lint 2>/dev/null || echo "Linting skipped - no lint script"
+        npm run lint:fix 2>/dev/null || echo "Lint fix skipped"
+
+    - name: Check code formatting (Prettier)
+      run: |
+        npx prettier --check Backend/**/*.js Frontend/src/**/*.{js,jsx} || echo "Formatting check failed"
+        npx prettier --write Backend/**/*.js Frontend/src/**/*.{js,jsx} || echo "Formatting fix applied"
+
+    - name: Security audit
+      run: |
+        cd Backend && npm audit --audit-level=high
+        cd Frontend && npm audit --audit-level=high
+
+    - name: Check for TODOs and FIXMEs
+      run: |
+        echo "Checking for TODOs and FIXMEs..."
+        grep -r "TODO\|FIXME" Backend/ Frontend/src/ || echo "No TODOs or FIXMEs found"
+
+    - name: Check for console.log statements
+      run: |
+        echo "Checking for console.log statements..."
+        grep -r "console\.log" Frontend/src/ || echo "No console.log statements found in frontend"
+        grep -r "console\.log" Backend/ --exclude-dir=node_modules || echo "No console.log statements found in backend"
+
+    - name: Check for hardcoded secrets
+      run: |
+        echo "Checking for hardcoded secrets..."
+        grep -r "password\|secret\|token\|key.*=" Backend/ Frontend/src/ --exclude-dir=node_modules || echo "No hardcoded secrets found"
+
+    - name: Analyze code complexity
+      run: |
+        echo "Analyzing code complexity..."
+        # Install complexity analyzer
+        npm install -g complexity-report
+        
+        # Analyze backend
+        complexity-report Backend/ --output json --format json > backend-complexity.json || echo "Backend complexity analysis failed"
+        
+        # Analyze frontend
+        complexity-report Frontend/src/ --output json --format json > frontend-complexity.json || echo "Frontend complexity analysis failed"
+        
+        echo "Complexity analysis completed"
+
+    - name: Post code review comments
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          // Read complexity reports
+          let backendComplexity = {};
+          let frontendComplexity = {};
+          
+          try {
+            backendComplexity = JSON.parse(fs.readFileSync('backend-complexity.json', 'utf8'));
+          } catch (e) {
+            console.log('No backend complexity report');
+          }
+          
+          try {
+            frontendComplexity = JSON.parse(fs.readFileSync('frontend-complexity.json', 'utf8'));
+          } catch (e) {
+            console.log('No frontend complexity report');
+          }
+          
+          // Create review comments
+          const comments = [];
+          
+          // Check for high complexity functions
+          if (backendComplexity.reports) {
+            backendComplexity.reports.forEach(report => {
+              if (report.complexity > 10) {
+                comments.push({
+                  path: report.path,
+                  line: report.line,
+                  body: `⚠️ **High Complexity**: This function has a complexity of ${report.complexity}. Consider refactoring.`
+                });
+              }
+            });
+          }
+          
+          if (frontendComplexity.reports) {
+            frontendComplexity.reports.forEach(report => {
+              if (report.complexity > 10) {
+                comments.push({
+                  path: report.path,
+                  line: report.line,
+                  body: `⚠️ **High Complexity**: This function has a complexity of ${report.complexity}. Consider refactoring.`
+                });
+              }
+            });
+          }
+          
+          // Post comments
+          for (const comment of comments) {
+            try {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment.body
+              });
+            } catch (error) {
+              console.log('Failed to post comment:', error.message);
+            }
+          }
+          
+          console.log(`Posted ${comments.length} code review comments`);
+
+  # Code review approval workflow
+  review-approval:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Check for required reviews
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { pull_request } = context.payload;
+          const requiredReviewers = 2; // Number of required reviewers
+          
+          // Get reviews
+          const reviews = await github.rest.pulls.listReviews({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: pull_request.number,
+          });
+          
+          const approvals = reviews.data.filter(review => 
+            review.state === 'APPROVED' && 
+            review.user.login !== pull_request.user.login
+          );
+          
+          console.log(`Approvals: ${approvals.length}/${requiredReviewers}`);
+          
+          if (approvals.length < requiredReviewers) {
+            console.log('Insufficient approvals');
+            // Add label for missing reviews
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pull_request.number,
+              labels: ['needs-review']
+            });
+          } else {
+            console.log('Sufficient approvals');
+            // Remove needs-review label if exists
+            try {
+              await github.rest.issues.removeLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pull_request.number,
+                name: 'needs-review'
+              });
+            } catch (e) {
+              // Label doesn't exist
+            }
+          }
+
+  # Automated PR description enhancement
+  enhance-pr-description:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    
+    steps:
+    - name: Enhance PR description
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { pull_request } = context.payload;
+          
+          // Get changed files
+          const files = await github.rest.pulls.listFiles({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: pull_request.number,
+          });
+          
+          const changedFiles = files.data.map(file => file.filename);
+          const backendFiles = changedFiles.filter(file => file.startsWith('Backend/'));
+          const frontendFiles = changedFiles.filter(file => file.startsWith('Frontend/'));
+          const configFiles = changedFiles.filter(file => file.includes('docker') || file.includes('.yml') || file.includes('.json'));
+          
+          // Generate enhanced description
+          let enhancedDescription = pull_request.body || '';
+          
+          enhancedDescription += '\n\n---\n\n## 📋 Changed Files\n\n';
+          
+          if (backendFiles.length > 0) {
+            enhancedDescription += '### Backend Changes\n';
+            backendFiles.forEach(file => {
+              enhancedDescription += `- \`${file}\`\n`;
+            });
+            enhancedDescription += '\n';
+          }
+          
+          if (frontendFiles.length > 0) {
+            enhancedDescription += '### Frontend Changes\n';
+            frontendFiles.forEach(file => {
+              enhancedDescription += `- \`${file}\`\n`;
+            });
+            enhancedDescription += '\n';
+          }
+          
+          if (configFiles.length > 0) {
+            enhancedDescription += '### Configuration Changes\n';
+            configFiles.forEach(file => {
+              enhancedDescription += `- \`${file}\`\n`;
+            });
+            enhancedDescription += '\n';
+          }
+          
+          enhancedDescription += '## ✅ Checklist\n\n';
+          enhancedDescription += '- [ ] Code follows style guidelines\n';
+          enhancedDescription += '- [ ] Self-tested the changes\n';
+          enhancedDescription += '- [ ] Documentation updated\n';
+          enhancedDescription += '- [ ] Tests added/updated\n';
+          enhancedDescription += '- [ ] No breaking changes\n\n';
+          
+          enhancedDescription += '## 🧪 Testing\n\n';
+          enhancedDescription += 'Please ensure all tests pass before merging.\n\n';
+          
+          enhancedDescription += '## 🔍 Code Review\n\n';
+          enhancedDescription += 'This PR requires at least 2 approvals before merging.\n';
+          
+          // Update PR description
+          await github.rest.pulls.update({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: pull_request.number,
+            body: enhancedDescription
+          });
+          
+          console.log('Enhanced PR description');

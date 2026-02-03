@@ -1,0 +1,271 @@
+name: Change Management
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+
+jobs:
+  # Semantic versioning and release management
+  semantic-release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: Backend/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd Backend && npm ci
+        npm install -g semantic-release
+
+    - name: Run semantic release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd Backend
+        npx semantic-release
+
+  # Change impact analysis
+  change-impact:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Analyze changes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          
+          // Get changed files
+          const changedFiles = execSync('git diff --name-only origin/main...HEAD', { encoding: 'utf8' }).split('\n');
+          
+          // Analyze impact
+          const impact = {
+            backend: false,
+            frontend: false,
+            database: false,
+            config: false,
+            tests: false,
+            docs: false,
+            critical: false
+          };
+          
+          changedFiles.forEach(file => {
+            if (file.startsWith('Backend/')) impact.backend = true;
+            if (file.startsWith('Frontend/')) impact.frontend = true;
+            if (file.includes('package.json')) impact.critical = true;
+            if (file.includes('docker-compose')) impact.config = true;
+            if (file.includes('db.js') || file.includes('models/')) impact.database = true;
+            if (file.includes('test')) impact.tests = true;
+            if (file.includes('docs') || file.endsWith('.md')) impact.docs = true;
+          });
+          
+          // Determine impact level
+          let impactLevel = 'low';
+          if (impact.critical || impact.database) impactLevel = 'high';
+          else if (impact.backend && impact.frontend) impactLevel = 'medium';
+          
+          // Create impact report
+          const report = {
+            impactLevel,
+            areas: Object.keys(impact).filter(key => impact[key]),
+            changedFiles: changedFiles.length,
+            recommendations: []
+          };
+          
+          if (impactLevel === 'high') {
+            report.recommendations.push('Requires thorough testing');
+            report.recommendations.push('Consider database migration');
+          }
+          
+          if (impact.database) {
+            report.recommendations.push('Database schema changes detected');
+          }
+          
+          if (impact.config) {
+            report.recommendations.push('Configuration changes - review deployment');
+          }
+          
+          // Post comment
+          const comment = `
+          ## 📊 Change Impact Analysis
+          
+          **Impact Level:** ${impactLevel.toUpperCase()}
+          
+          **Affected Areas:** ${report.areas.join(', ')}
+          
+          **Files Changed:** ${report.changedFiles}
+          
+          **Recommendations:**
+          ${report.recommendations.map(rec => `- ${rec}`).join('\n')}
+          
+          ---
+          *Automated impact analysis*
+          `;
+          
+          await github.rest.issues.createComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            issue_number: context.issue.number,
+            body: comment
+          });
+
+  # Dependency vulnerability check
+  vulnerability-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Scan backend dependencies
+      working-directory: ./Backend
+      run: |
+        npm audit --audit-level=high
+        npm audit --json > audit-report.json || true
+
+    - name: Scan frontend dependencies
+      working-directory: ./Frontend
+      run: |
+        npm audit --audit-level=high
+        npm audit --json > audit-report.json || true
+
+    - name: Check for high vulnerabilities
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          
+          let highVulnerabilities = 0;
+          
+          try {
+            const backendAudit = JSON.parse(fs.readFileSync('Backend/audit-report.json', 'utf8'));
+            highVulnerabilities += backendAudit.vulnerabilities?.filter(v => v.severity === 'high')?.length || 0;
+          } catch (e) {
+            console.log('No backend audit report');
+          }
+          
+          try {
+            const frontendAudit = JSON.parse(fs.readFileSync('Frontend/audit-report.json', 'utf8'));
+            highVulnerabilities += frontendAudit.vulnerabilities?.filter(v => v.severity === 'high')?.length || 0;
+          } catch (e) {
+            console.log('No frontend audit report');
+          }
+          
+          if (highVulnerabilities > 0) {
+            const comment = `
+            ## 🚨 Security Vulnerabilities Found
+            
+            **High Severity Vulnerabilities:** ${highVulnerabilities}
+            
+            Please run \`npm audit fix\` to resolve these issues before merging.
+            
+            ---
+            *Automated security scan*
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+            
+            // Add label
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['security-vulnerabilities']
+            });
+          }
+
+  # Breaking change detection
+  breaking-change-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check for breaking changes
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { execSync } = require('child_process');
+          
+          // Get commit messages
+          const commits = execSync('git log origin/main...HEAD --pretty=format:"- %s"', { encoding: 'utf8' }).split('\n');
+          
+          // Look for breaking change indicators
+          const breakingIndicators = [
+            'BREAKING CHANGE:',
+            'feat!:',
+            'refactor!:',
+            'perf!:',
+            'fix!:'
+          ];
+          
+          const breakingChanges = commits.filter(commit => 
+            breakingIndicators.some(indicator => commit.includes(indicator))
+          );
+          
+          if (breakingChanges.length > 0) {
+            const comment = `
+            ## 💥 Breaking Changes Detected
+            
+            ${breakingChanges.map(change => `- ${change}`).join('\n')}
+            
+            **Action Required:**
+            - Update documentation
+            - Notify affected teams
+            - Consider migration guide
+            - Update version number (major)
+            
+            ---
+            *Automated breaking change detection*
+            `;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+            
+            // Add labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['breaking-change', 'major-release']
+            });
+          }

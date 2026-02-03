@@ -4,15 +4,16 @@ import dotenv from "dotenv";
 import { getDB } from "./config/db.js";
 import { sentryMiddleware, requestTrackingMiddleware, performanceMiddleware, errorContextMiddleware, complianceMiddleware } from "./middleware/sentry.js";
 import { performanceTrackingMiddleware } from "./config/performance.js";
-import complianceRoutes from "./routes/compliance/ComplianceRoutes.js";
-
-// #region ImportRoutes
-import authRoutes from "./routes/auth/AuthRoutes.js";
+import { complianceRoutes } from "./routes/compliance/ComplianceRoutes.js";
+import { monitoringRoutes } from "./routes/monitoring/MonitoringRoutes.js";
+import { initializeRedis } from "./config/redis.js";
+import { apiCacheMiddleware, bloodBankCacheMiddleware, ngoCacheMiddleware, searchCacheMiddleware, invalidateCacheMiddleware } from "./middleware/cache.js";
 import ngoRoutes from "./routes/ngo/NgoRoutes.js";
 import donorRoutes from "./routes/donor/DonorRoutes.js";
 import adminAuthRoutes from "./routes/admin/AdminAuthRoutes.js";
 import approvalRoutes from "./routes/admin/ApprovalRoutes.js";
 import adminHospitalRoutes from "./routes/admin/HospitalRoutes.js";
+import authRoutes from "./routes/auth/AuthRoutes.js";
 import bloodBankRoutes from "./routes/admin/BloodBankRoutes.js";
 import adminNgoRoutes from "./routes/admin/NgoRoutes.js";
 import bloodStockRoutes from "./routes/admin/BloodStockRoutes.js";
@@ -59,6 +60,16 @@ app.use(performanceTrackingMiddleware);
 app.use(complianceMiddleware);
 app.use(errorContextMiddleware);
 
+// Initialize Redis
+initializeRedis().catch(console.warn);
+
+// Cache middleware
+app.use(apiCacheMiddleware());
+app.use(bloodBankCacheMiddleware());
+app.use(ngoCacheMiddleware());
+app.use(searchCacheMiddleware());
+app.use(invalidateCacheMiddleware());
+
 // #region RequestLogging
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
@@ -91,7 +102,12 @@ app.get("/health", (req, res) => {
     },
     monitoring: {
       sentry: !!process.env.SENTRY_DSN,
-      logging: true
+      logging: true,
+      redis: true
+    },
+    cache: {
+      redis: true,
+      enabled: true
     },
     uptime: process.uptime(),
     memory: process.memoryUsage(),

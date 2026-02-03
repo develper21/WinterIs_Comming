@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # Staging MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: sebn-mongodb-staging
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME_FILE: /run/secrets/mongo_root_username
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongo_root_password
+      MONGO_INITDB_DATABASE: sebn_staging_db
+    volumes:
+      - mongodb_staging_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - sebn-staging-network
+    secrets:
+      - mongo_root_username
+      - mongo_root_password
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # Staging Backend
+  backend:
+    image: bloodbank/backend:develop
+    container_name: sebn-backend-staging
+    restart: unless-stopped
+    environment:
+      NODE_ENV: staging
+      PORT: 3000
+      MONGODB_URI_FILE: /run/secrets/mongodb_uri
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      CORS_ORIGIN: https://staging.bloodbank.yourdomain.com
+      LOG_LEVEL: info
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - sebn-staging-network
+    secrets:
+      - mongodb_uri
+      - jwt_secret
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Staging Frontend
+  frontend:
+    image: bloodbank/frontend:develop
+    container_name: sebn-frontend-staging
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: https://staging-api.bloodbank.yourdomain.com
+      VITE_NODE_ENV: staging
+    depends_on:
+      - backend
+    networks:
+      - sebn-staging-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Staging Redis
+  redis:
+    image: redis:7-alpine
+    container_name: sebn-redis-staging
+    restart: unless-stopped
+    command: redis-server --requirepass-file /run/secrets/redis_password
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - sebn-staging-network
+    secrets:
+      - redis_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Staging Nginx
+  nginx:
+    image: nginx:alpine
+    container_name: sebn-nginx-staging
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.staging.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - sebn-staging-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  mongodb_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local
+
+networks:
+  sebn-staging-network:
+    driver: bridge
+
+secrets:
+  mongo_root_username:
+    file: ./secrets/staging/mongo_root_username.txt
+  mongo_root_password:
+    file: ./secrets/staging/mongo_root_password.txt
+  mongodb_uri:
+    file: ./secrets/staging/mongodb_uri.txt
+  jwt_secret:
+    file: ./secrets/staging/jwt_secret.txt
+  redis_password:
+    file: ./secrets/staging/redis_password.txt

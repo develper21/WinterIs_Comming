@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # Development MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: sebn-mongodb-dev
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: sebn_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_dev_data:/data/db
+    networks:
+      - sebn-dev-network
+
+  # Development Backend
+  backend:
+    build:
+      context: ./Backend
+      target: development
+    container_name: sebn-backend-dev
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/sebn_db?authSource=admin
+      JWT_SECRET: dev-jwt-secret-key
+      CORS_ORIGIN: http://localhost:5173
+      LOG_LEVEL: debug
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+    depends_on:
+      - mongodb
+    networks:
+      - sebn-dev-network
+
+  # Development Frontend
+  frontend:
+    build:
+      context: ./Frontend
+      target: development
+    container_name: sebn-frontend-dev
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3000/api
+      VITE_NODE_ENV: development
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - sebn-dev-network
+
+volumes:
+  mongodb_dev_data:
+    driver: local
+
+networks:
+  sebn-dev-network:
+    driver: bridge

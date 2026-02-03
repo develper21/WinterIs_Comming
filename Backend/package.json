@@ -17,7 +17,8 @@
     "express": "^4.19.2",
     "express-rate-limit": "^8.2.1",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.21.0"
+    "mongodb": "^6.21.0",
+    "redis": "^5.10.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-runtime": "^7.29.0",

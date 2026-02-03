@@ -1,0 +1,79 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/app/*.log
+    - /var/log/app/*/*.log
+  fields:
+    service: bloodbank-backend
+    environment: ${ENVIRONMENT:development}
+  fields_under_root: true
+  multiline.pattern: '^\d{4}-\d{2}-\d{2}'
+  multiline.negate: true
+  multiline.match: after
+
+- type: container
+  enabled: true
+  paths:
+    - '/var/lib/docker/containers/*/*.log'
+  processors:
+    - add_docker_metadata:
+        host: "unix:///var/run/docker.sock"
+  fields:
+    service: docker
+    environment: ${ENVIRONMENT:development}
+  fields_under_root: true
+
+# Add metadata to each event
+filebeat.autodiscover:
+  providers:
+    - type: docker
+      hints.enabled: true
+      hints.default_config:
+        type: container
+        paths:
+          - /var/lib/docker/containers/${data.docker.container.id}/*.log
+
+# Processors to enrich data
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - add_cloud_metadata: ~
+  - add_docker_metadata: ~
+
+# Output configuration
+output.logstash:
+  hosts: ["logstash:5044"]
+  compression_level: 3
+  escape_html: false
+
+# Logging configuration
+logging.level: info
+logging.to_files: true
+logging.files:
+  path: /var/log/filebeat
+  name: filebeat
+  keepfiles: 7
+  permissions: 0644
+
+# Monitoring
+monitoring.enabled: true
+monitoring.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+
+# Queue configuration
+queue.mem:
+  events: 4096
+  flush.min_events: 512
+  flush.timeout: 1s
+
+# Template settings
+setup.template.settings:
+  index.number_of_shards: 1
+  index.codec: best_compression
+
+# ILM policy
+setup.ilm.enabled: auto
+setup.ilm.rollover_alias: "bloodbank-logs"
+setup.ilm.pattern: "{now/d}-000001"
+setup.ilm.policy: "bloodbank-policy"

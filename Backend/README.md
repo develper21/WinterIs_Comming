@@ -1,6 +1,6 @@
-# SEBN Backend - MongoDB Edition
+# BloodBridge Backend
 
-Smart Emergency Blood Network Backend with MongoDB native driver.
+A comprehensive backend system for managing blood banks, hospitals, NGOs, and donors in a unified platform.
 
 ## 📁 Project Structure
 

@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const [hoveredFeature, setHoveredFeature] = useState(null);
 
   const features = [
     {
@@ -48,10 +46,10 @@ export default function LandingPage() {
         <nav className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">🩸</span>
+              <img src="/bloodbridge-logo.svg" alt="BloodBridge" className="w-6 h-6" />
             </div>
             <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-              BloodLink
+              BloodBridge
             </span>
           </div>
           <div className="flex items-center gap-3 sm:gap-4">
@@ -136,8 +134,6 @@ export default function LandingPage() {
               {features.map((feature, index) => (
                 <div
                   key={index}
-                  onMouseEnter={() => setHoveredFeature(index)}
-                  onMouseLeave={() => setHoveredFeature(null)}
                   className="group relative bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-gray-700 hover:border-red-500 transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/20 cursor-pointer"
                 >
                   {/* Gradient Background */}
@@ -316,13 +312,13 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
-              <p>© 2024 BloodLink. All rights reserved. Saving lives, one donation at a time.</p>
+              <p>© 2024 BloodBridge. All rights reserved. Saving lives, one donation at a time.</p>
             </div>
           </div>
         </footer>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0%, 100% {
             transform: translate(0, 0) scale(1);

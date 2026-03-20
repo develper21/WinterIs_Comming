@@ -1,5 +1,5 @@
 {
-  "name": "sebn-backend",
+  "name": "bloodbridge-backend",
   "version": "1.0.0",
   "type": "module",
   "main": "server.js",

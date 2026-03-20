@@ -1,0 +1,129 @@
+# =================================
+# SEBN BLOOD BANK - ROOT GITIGNORE
+# =================================
+
+# Backend
+Backend/node_modules/
+Backend/.env
+Backend/.env.local
+Backend/.env.development.local
+Backend/.env.test.local
+Backend/.env.production.local
+Backend/logs/
+Backend/*.log
+Backend/uploads/
+Backend/coverage/
+Backend/dist/
+Backend/build/
+Backend/*.pid
+Backend/dump.rdb
+
+# Frontend
+Frontend/node_modules/
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.development.local
+Frontend/.env.test.local
+Frontend/.env.production.local
+Frontend/dist/
+Frontend/build/
+Frontend/.next/
+Frontend/.nuxt/
+Frontend/.cache/
+Frontend/.parcel-cache/
+Frontend/coverage/
+Frontend/*.log
+Frontend/dist-ssr/
+Frontend/.local
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directories
+coverage/
+*.lcov
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache/
+.node_repl_history
+
+# Build outputs
+dist/
+build/
+.next/
+.nuxt/
+.out/
+.storybook-out/
+
+# Temporary files
+tmp/
+temp/
+
+# Package manager files
+*.tgz
+.yarn-integrity
+.pnpm-debug.log*
+
+# Testing
+/coverage
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Redis
+dump.rdb
+
+# Docker
+.dockerignore
+
+# Secrets (never commit!)
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+
+# IDE specific
+.vscode/settings.json
+.idea/workspace.xml
+
+# Misc
+*.tsbuildinfo

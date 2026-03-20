@@ -11,6 +11,7 @@ import { apiCacheMiddleware, bloodBankCacheMiddleware, ngoCacheMiddleware, searc
 import ngoRoutes from "./routes/ngo/NgoRoutes.js";
 import donorRoutes from "./routes/donor/DonorRoutes.js";
 import adminAuthRoutes from "./routes/admin/AdminAuthRoutes.js";
+import superAdminAuthRoutes from "./routes/admin/SuperAdminAuthRoutes.js";
 import approvalRoutes from "./routes/admin/ApprovalRoutes.js";
 import adminHospitalRoutes from "./routes/admin/HospitalRoutes.js";
 import authRoutes from "./routes/auth/AuthRoutes.js";
@@ -42,8 +43,14 @@ dotenv.config();
 const app = express();
 
 // #region CorsConfig
+const corsOrigins = process.env.CORS_ORIGIN ? 
+  process.env.CORS_ORIGIN.split(',') : 
+  ["http://localhost:3000", "http://localhost:5173"];
+
+console.log("CORS Origins:", corsOrigins);
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "*",
+  origin: corsOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -91,7 +98,7 @@ app.get("/health", (req, res) => {
   
   res.json({
     status: "OK",
-    message: "SEBN Backend is running 🚀",
+    message: "BloodBridge Backend is running 🚀",
     timestamp: new Date().toISOString(),
     requestId: req.requestId,
     environment: process.env.NODE_ENV || 'development',
@@ -116,7 +123,7 @@ app.get("/health", (req, res) => {
 
 // #region RootRoute
 app.get("/", (req, res) => {
-  res.json({ message: "SEBN Backend Running 🚀" });
+  res.json({ message: "BloodBridge Backend Running 🚀" });
 });
 
 // #region PublicCamps
@@ -327,6 +334,7 @@ app.post("/api/test/create-sample-slots", async (req, res) => {
 // #region ApiRoutesSetup
 app.use("/api/auth/org", orgRegistrationRoutes);  // ← Organization registration
 app.use("/api/auth", authRoutes);
+app.use("/api/superadmin/auth", superAdminAuthRoutes);
 app.use("/api/admin/auth", adminAuthRoutes);
 app.use("/api/admin/approvals", approvalRoutes);
 app.use("/api/admin/hospitals", adminHospitalRoutes);

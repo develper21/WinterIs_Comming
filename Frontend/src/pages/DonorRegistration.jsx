@@ -143,7 +143,7 @@ export default function DonorRegistration() {
       nextDonationDate.setDate(nextDonationDate.getDate() + 90);
 
       // Register donor with camp registration
-      const response = await axios.post("http://localhost:5000/api/donor/register", {
+      await axios.post("http://localhost:5000/api/donor/register", {
         name: formData.name,
         age: parseInt(formData.age),
         gender: formData.gender,
@@ -214,10 +214,10 @@ export default function DonorRegistration() {
           </button>
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">🩸</span>
+              <img src="/bloodbridge-logo.svg" alt="BloodBridge" className="w-6 h-6" />
             </div>
             <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-              BloodLink
+              BloodBridge
             </span>
           </div>
           <div className="w-12"></div>
@@ -534,7 +534,7 @@ export default function DonorRegistration() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0%, 100% {
             transform: translate(0, 0) scale(1);

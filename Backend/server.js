@@ -21,7 +21,7 @@ const startServer = async () => {
       console.log(`
 ╔═══════════════════════════════════════════════╗
 ║                                               ║
-║      SEBN Backend Server Started              ║
+║      BloodBridge Backend Server Started        ║
 ║      Port: ${PORT}                            ║
 ║      Environment: ${process.env.NODE_ENV}     ║
 ║      Database: MongoDB                        ║

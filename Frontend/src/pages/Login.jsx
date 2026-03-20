@@ -64,16 +64,19 @@ export default function Login() {
         toast.success("Login successful! Redirecting...");
 
         // 🔀 ORGANIZATION TYPE REDIRECT
-        // Redirect based on the organization type the user belongs to
+        // Redirect based on organization type user belongs to
         setTimeout(() => {
           const orgType = user.organizationType ? user.organizationType.toLowerCase() : "";
+          console.log("Redirecting based on organization type:", orgType);
+          
           if (orgType === "hospital") {
             navigate("/hospital");
-          } else if (orgType === "bloodbank") {
+          } else if (orgType === "blood_bank" || orgType === "bloodbank") {
             navigate("/bloodbank");
           } else if (orgType === "ngo") {
             navigate("/ngo/dashboard");
           } else {
+            console.log("Unknown organization type:", orgType);
             navigate("/login");
           }
         }, 500);

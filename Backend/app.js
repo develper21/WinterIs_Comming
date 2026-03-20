@@ -2,10 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { getDB } from "./config/db.js";
-import { sentryMiddleware, requestTrackingMiddleware, performanceMiddleware, errorContextMiddleware, complianceMiddleware } from "./middleware/sentry.js";
+import { sentryMiddleware, requestTrackingMiddleware, performanceMiddleware, errorContextMiddleware } from "./middleware/sentry.js";
 import { performanceTrackingMiddleware } from "./config/performance.js";
-import { complianceRoutes } from "./routes/compliance/ComplianceRoutes.js";
-import { monitoringRoutes } from "./routes/monitoring/MonitoringRoutes.js";
+import complianceRoutes from "./routes/compliance/ComplianceRoutes.js";
+import monitoringRoutes from "./routes/monitoring/MonitoringRoutes.js";
 import { initializeRedis } from "./config/redis.js";
 import { apiCacheMiddleware, bloodBankCacheMiddleware, ngoCacheMiddleware, searchCacheMiddleware, invalidateCacheMiddleware } from "./middleware/cache.js";
 import ngoRoutes from "./routes/ngo/NgoRoutes.js";
@@ -31,7 +31,7 @@ import publicBloodBankRoutes from "./routes/BloodBankRoutes.js";  // ← Public 
 import publicNgoRoutes from "./routes/NgoPublicRoutes.js";  // ← Public NGOs
 import debugRoutes from "./routes/DebugRoutes.js";  // ← Debug routes
 import syncRoutes from "./routes/SyncRoutes.js";  // ← Sync routes
-import monitoringRoutes from "./routes/monitoring/MonitoringRoutes.js";  // ← Monitoring routes
+// import monitoringRoutes from "./routes/monitoring/MonitoringRoutes.js";
 
 
 // #region ImportMiddleware
@@ -57,7 +57,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestTrackingMiddleware);
 app.use(performanceMiddleware);
 app.use(performanceTrackingMiddleware);
-app.use(complianceMiddleware);
 app.use(errorContextMiddleware);
 
 // Initialize Redis

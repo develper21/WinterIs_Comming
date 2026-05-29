@@ -2,6 +2,23 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Sparkles,
+  HeartPulse,
+  ShieldCheck,
+  CalendarDays,
+  MapPin,
+  Phone,
+  Mail,
+  UserRound,
+  Droplets,
+  Building2,
+  ChevronDown,
+  BadgeCheck,
+  Users2,
+} from "lucide-react";
 
 export default function DonorRegistration() {
   const navigate = useNavigate();
@@ -30,11 +47,12 @@ export default function DonorRegistration() {
   const bloodGroups = ["O+", "O-", "A+", "A-", "B+", "B-", "AB+", "AB-"];
   const genders = ["Male", "Female", "Other"];
 
-  // Fetch available camps
   useEffect(() => {
     const fetchCamps = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/public/camps");
+        const response = await axios.get(
+          "http://localhost:5000/api/public/camps",
+        );
         if (response.data.success && response.data.camps) {
           setCamps(response.data.camps);
         }
@@ -45,10 +63,10 @@ export default function DonorRegistration() {
         setCampsLoading(false);
       }
     };
+
     fetchCamps();
   }, []);
 
-  // Fetch slots when camp is selected
   useEffect(() => {
     const fetchSlots = async () => {
       if (!selectedCamp) {
@@ -60,11 +78,12 @@ export default function DonorRegistration() {
       setSlotsLoading(true);
       try {
         const response = await axios.get(
-          `http://localhost:5000/api/public/camps/${selectedCamp._id}/slots`
+          `http://localhost:5000/api/public/camps/${selectedCamp._id}/slots`,
         );
+
         if (response.data.success && response.data.slots) {
           setSlots(response.data.slots);
-          setSelectedSlot(null); // Reset selected slot when camp changes
+          setSelectedSlot(null);
         } else {
           setSlots([]);
           toast.info("No time slots available for this camp");
@@ -77,6 +96,7 @@ export default function DonorRegistration() {
         setSlotsLoading(false);
       }
     };
+
     fetchSlots();
   }, [selectedCamp]);
 
@@ -93,6 +113,7 @@ export default function DonorRegistration() {
     setFormData((prev) => ({
       ...prev,
       campId: camp._id.toString(),
+      slotId: "",
     }));
   };
 
@@ -101,35 +122,44 @@ export default function DonorRegistration() {
     setFormData((prev) => ({
       ...prev,
       slotId: slot._id.toString(),
+      donationTime: slot.slotTime,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate required fields
-    if (!formData.name || !formData.age || !formData.gender || !formData.bloodGroup || !formData.mobileNumber || !formData.city || !formData.donationDate || !selectedCamp || !selectedSlot) {
-      toast.error("Please fill in all required fields including camp and time slot selection");
+    if (
+      !formData.name ||
+      !formData.age ||
+      !formData.gender ||
+      !formData.bloodGroup ||
+      !formData.mobileNumber ||
+      !formData.city ||
+      !formData.donationDate ||
+      !selectedCamp ||
+      !selectedSlot
+    ) {
+      toast.error(
+        "Please fill in all required fields including camp and time slot selection",
+      );
       return;
     }
 
-    // Validate age
     if (formData.age < 18 || formData.age > 65) {
       toast.error("Age must be between 18 and 65 years");
       return;
     }
 
-    // Validate mobile number
     if (!/^\d{10}$/.test(formData.mobileNumber)) {
       toast.error("Mobile number must be 10 digits");
       return;
     }
 
-    // Validate donation date is not in the past
     const selectedDate = new Date(formData.donationDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     if (selectedDate < today) {
       toast.error("Please select a future date for donation");
       return;
@@ -138,11 +168,9 @@ export default function DonorRegistration() {
     setLoading(true);
 
     try {
-      // Calculate next donation eligibility date (90 days after selected donation date)
       const nextDonationDate = new Date(formData.donationDate);
       nextDonationDate.setDate(nextDonationDate.getDate() + 90);
 
-      // Register donor with camp registration
       await axios.post("http://localhost:5000/api/donor/register", {
         name: formData.name,
         age: parseInt(formData.age),
@@ -154,16 +182,17 @@ export default function DonorRegistration() {
         email: formData.email,
         donationDate: formData.donationDate,
         donationTime: selectedSlot.slotTime,
-        nextDonationDate: nextDonationDate.toISOString().split('T')[0],
+        nextDonationDate: nextDonationDate.toISOString().split("T")[0],
         campId: formData.campId,
         slotId: formData.slotId,
         campName: selectedCamp.campName,
         campLocation: selectedCamp.location,
       });
 
-      toast.success("Registration successful! You are now registered as a blood donor.");
-      
-      // Reset form
+      toast.success(
+        "Registration successful! You are now registered as a blood donor.",
+      );
+
       setFormData({
         name: "",
         age: "",
@@ -180,385 +209,581 @@ export default function DonorRegistration() {
       });
       setSelectedCamp(null);
       setSelectedSlot(null);
+      setSlots([]);
 
-      // Redirect to landing page after 2 seconds
       setTimeout(() => {
         navigate("/");
       }, 2000);
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error(error.response?.data?.message || "Registration failed. Please try again.");
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again.",
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-red-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-rose-500/20 blur-3xl" />
+        <div className="absolute top-20 right-0 h-[420px] w-[420px] rounded-full bg-pink-500/15 blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-6">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors"
-          >
-            <span className="text-2xl">←</span>
-            <span>Back</span>
-          </button>
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-              <img src="/bloodbridge-logo.svg" alt="BloodBridge" className="w-6 h-6" />
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-20 items-center justify-between">
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-3 text-gray-300 transition hover:text-white"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Back</span>
+              </button>
+
+              <button
+                onClick={() => navigate("/")}
+                className="flex items-center gap-3 group"
+              >
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-2xl bg-rose-500/30 blur-2xl" />
+                  <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 shadow-lg shadow-rose-500/20">
+                    <HeartPulse className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+
+                <div className="text-left leading-tight">
+                  <span className="block text-lg sm:text-xl font-extrabold tracking-tight text-white">
+                    BloodBridge
+                  </span>
+                  <span className="block text-xs sm:text-sm text-gray-400">
+                    Donor registration portal
+                  </span>
+                </div>
+              </button>
+
+              <div className="w-16" />
             </div>
-            <span className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-              BloodBridge
-            </span>
           </div>
-          <div className="w-12"></div>
-        </div>
+        </header>
 
-        {/* Form Container */}
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12">
-          <div className="w-full max-w-2xl">
-            {/* Form Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-                <span className="bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
-                  Become a Blood Donor
-                </span>
-              </h1>
-              <p className="text-gray-300">Join our community and save lives with your donation</p>
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          {/* Hero */}
+          <section className="text-center max-w-4xl mx-auto pt-4 pb-10">
+            <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
+              <Sparkles className="h-4 w-4" />
+              Join the donor network
             </div>
 
-            {/* Form Card */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 sm:p-8 border border-gray-700">
+            <h1 className="mt-6 text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
+              <span className="block text-white">Become a</span>
+              <span className="block bg-gradient-to-r from-rose-400 via-pink-400 to-red-400 bg-clip-text text-transparent">
+                Blood Donor
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-5 max-w-2xl text-lg text-gray-400 leading-relaxed">
+              Register once, choose a camp, select a time slot, and help save
+              lives through a secure and guided donation flow.
+            </p>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-4">
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+                <div className="text-2xl font-black text-white">18–65</div>
+                <div className="mt-1 text-sm text-gray-400">Eligible age</div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+                <div className="text-2xl font-black text-white">90 Days</div>
+                <div className="mt-1 text-sm text-gray-400">
+                  Between donations
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+                <div className="text-2xl font-black text-white">Secure</div>
+                <div className="mt-1 text-sm text-gray-400">
+                  Private details
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
+            {/* Left side info */}
+            <div className="rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-rose-500/20 bg-rose-500/10 px-4 py-2 text-sm text-rose-300">
+                <BadgeCheck className="h-4 w-4" />
+                Donation readiness guide
+              </div>
+
+              <h2 className="mt-6 text-3xl sm:text-4xl font-black leading-tight text-white">
+                Simple, guided registration
+              </h2>
+
+              <p className="mt-4 text-gray-400 leading-relaxed">
+                Fill in your donor details, pick a camp, choose an available
+                slot, and complete registration in one clean workflow.
+              </p>
+
+              <div className="mt-8 space-y-4">
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/15">
+                    <Users2 className="h-5 w-5 text-rose-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Donor profile</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Name, age, blood group, phone number, and location.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15">
+                    <Building2 className="h-5 w-5 text-cyan-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Camp selection</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Choose a verified donation camp with available slots.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15">
+                    <ShieldCheck className="h-5 w-5 text-emerald-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Safe donation</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      A 90-day eligibility rule helps protect donor health.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 rounded-[28px] border border-white/10 bg-gradient-to-r from-rose-500/10 via-pink-500/5 to-red-500/10 p-5">
+                <p className="text-sm font-semibold text-white">
+                  Before you begin
+                </p>
+                <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                  Make sure your phone number is valid and your donation date is
+                  in the future. The selected camp determines the time slots
+                  available for booking.
+                </p>
+              </div>
+            </div>
+
+            {/* Form side */}
+            <div className="rounded-[36px] border border-white/10 bg-white/5 p-6 sm:p-8 backdrop-blur-2xl shadow-2xl">
+              <div className="mb-8 flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-gray-400">Step-by-step form</p>
+                  <h2 className="mt-2 text-3xl font-black text-white">
+                    Register as a donor
+                  </h2>
+                </div>
+
+                <div className="hidden sm:flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-500/15">
+                  <Droplets className="h-7 w-7 text-rose-300" />
+                </div>
+              </div>
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Enter your full name"
-                    className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                    required
-                  />
-                </div>
-
-                {/* Age and Gender */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* Donor details */}
+                <div className="grid gap-5">
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Age *
+                    <label className="mb-2 block text-sm font-medium text-gray-300">
+                      Full Name *
                     </label>
-                    <input
-                      type="number"
-                      name="age"
-                      value={formData.age}
-                      onChange={handleChange}
-                      placeholder="18-65 years"
-                      min="18"
-                      max="65"
-                      className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                      required
-                    />
+                    <div className="relative">
+                      <UserRound className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Enter your full name"
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+                        required
+                      />
+                    </div>
                   </div>
+
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Age *
+                      </label>
+                      <input
+                        type="number"
+                        name="age"
+                        value={formData.age}
+                        onChange={handleChange}
+                        placeholder="18-65 years"
+                        min="18"
+                        max="65"
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Gender *
+                      </label>
+                      <div className="relative">
+                        <select
+                          name="gender"
+                          value={formData.gender}
+                          onChange={handleChange}
+                          className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-12 text-white outline-none transition focus:border-rose-500 focus:bg-white/10"
+                          required
+                        >
+                          <option value="" className="bg-slate-950">
+                            Select Gender
+                          </option>
+                          {genders.map((g) => (
+                            <option key={g} value={g} className="bg-slate-950">
+                              {g}
+                            </option>
+                          ))}
+                        </select>
+                        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Gender *
+                    <label className="mb-2 block text-sm font-medium text-gray-300">
+                      Blood Group *
                     </label>
-                    <select
-                      name="gender"
-                      value={formData.gender}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                      required
-                    >
-                      <option value="">Select Gender</option>
-                      {genders.map((g) => (
-                        <option key={g} value={g} className="bg-slate-900">
-                          {g}
+                    <div className="relative">
+                      <Droplets className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                      <select
+                        name="bloodGroup"
+                        value={formData.bloodGroup}
+                        onChange={handleChange}
+                        className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-12 text-white outline-none transition focus:border-rose-500 focus:bg-white/10"
+                        required
+                      >
+                        <option value="" className="bg-slate-950">
+                          Select Blood Group
                         </option>
-                      ))}
-                    </select>
+                        {bloodGroups.map((bg) => (
+                          <option key={bg} value={bg} className="bg-slate-950">
+                            {bg}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                    </div>
                   </div>
-                </div>
 
-                {/* Blood Group */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Blood Group *
-                  </label>
-                  <select
-                    name="bloodGroup"
-                    value={formData.bloodGroup}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                    required
-                  >
-                    <option value="">Select Blood Group</option>
-                    {bloodGroups.map((bg) => (
-                      <option key={bg} value={bg} className="bg-slate-900">
-                        {bg}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Mobile Number *
+                      </label>
+                      <div className="relative">
+                        <Phone className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                        <input
+                          type="tel"
+                          name="mobileNumber"
+                          value={formData.mobileNumber}
+                          onChange={handleChange}
+                          placeholder="10 digit number"
+                          pattern="\d{10}"
+                          className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+                          required
+                        />
+                      </div>
+                    </div>
 
-                {/* Mobile and City */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        City *
+                      </label>
+                      <div className="relative">
+                        <MapPin className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                        <input
+                          type="text"
+                          name="city"
+                          value={formData.city}
+                          onChange={handleChange}
+                          placeholder="Your city"
+                          className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      Mobile Number *
+                    <label className="mb-2 block text-sm font-medium text-gray-300">
+                      Address (Optional)
                     </label>
-                    <input
-                      type="tel"
-                      name="mobileNumber"
-                      value={formData.mobileNumber}
+                    <textarea
+                      name="address"
+                      value={formData.address}
                       onChange={handleChange}
-                      placeholder="10 digit number"
-                      pattern="\d{10}"
-                      className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                      required
+                      placeholder="Your street address"
+                      rows={3}
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10 resize-none"
                     />
                   </div>
+
                   <div>
-                    <label className="block text-sm font-semibold text-white mb-2">
-                      City *
+                    <label className="mb-2 block text-sm font-medium text-gray-300">
+                      Email (Optional)
                     </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      placeholder="Your city"
-                      className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                      required
-                    />
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="your@email.com"
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+                      />
+                    </div>
                   </div>
                 </div>
 
-                {/* Address (Optional) */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Address (Optional)
-                  </label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="Your street address"
-                    rows={3}
-                    className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all resize-none"
-                  ></textarea>
-                </div>
+                {/* Camp selection */}
+                <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5 sm:p-6">
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-500/15">
+                      <Building2 className="h-5 w-5 text-rose-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">
+                        Select Blood Donation Camp *
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Choose a verified camp with available slots.
+                      </p>
+                    </div>
+                  </div>
 
-                {/* Email (Optional) */}
-                <div>
-                  <label className="block text-sm font-semibold text-white mb-2">
-                    Email (Optional)
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="your@email.com"
-                    className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                  />
-                </div>
-
-                {/* Camp Selection Dropdown */}
-                <div className="border-t border-gray-700 pt-6 mt-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">🏥 Select Blood Donation Camp *</h3>
-                  
                   {campsLoading ? (
-                    <div className="text-center py-4">
-                      <p className="text-gray-300">Loading camps...</p>
+                    <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                      <p className="text-sm text-gray-300">Loading camps...</p>
                     </div>
                   ) : camps.length === 0 ? (
-                    <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-                      <p className="text-yellow-300">No camps available at the moment. Please check back later.</p>
+                    <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
+                      <p className="text-sm text-amber-200">
+                        No camps available at the moment. Please check back
+                        later.
+                      </p>
                     </div>
                   ) : (
-                    <select
-                      value={selectedCamp ? selectedCamp._id.toString() : ""}
-                      onChange={(e) => {
-                        const campId = e.target.value;
-                        const camp = camps.find(c => c._id.toString() === campId);
-                        if (camp) {
-                          handleCampSelection(camp);
-                        }
-                      }}
-                      className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                      required
-                    >
-                      <option value="">-- Select a Camp --</option>
-                      {camps.map((camp) => (
-                        <option key={camp._id} value={camp._id.toString()} className="bg-slate-900">
-                          {camp.campName} - {camp.location} ({new Date(camp.startDate).toLocaleDateString()})
+                    <div className="relative">
+                      <select
+                        value={selectedCamp ? selectedCamp._id.toString() : ""}
+                        onChange={(e) => {
+                          const campId = e.target.value;
+                          const camp = camps.find(
+                            (c) => c._id.toString() === campId,
+                          );
+                          if (camp) handleCampSelection(camp);
+                        }}
+                        className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-12 text-white outline-none transition focus:border-rose-500 focus:bg-white/10"
+                        required
+                      >
+                        <option value="" className="bg-slate-950">
+                          -- Select a Camp --
                         </option>
-                      ))}
-                    </select>
+                        {camps.map((camp) => (
+                          <option
+                            key={camp._id}
+                            value={camp._id.toString()}
+                            className="bg-slate-950"
+                          >
+                            {camp.campName} - {camp.location} (
+                            {new Date(camp.startDate).toLocaleDateString()})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                    </div>
                   )}
 
                   {selectedCamp && (
-                    <div className="mt-4 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                      <p className="text-green-300 text-sm">
-                        ✓ Selected: <strong>{selectedCamp.campName}</strong> - {selectedCamp.location}
+                    <div className="mt-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+                      <p className="text-sm text-emerald-200">
+                        <strong>Selected:</strong> {selectedCamp.campName} -{" "}
+                        {selectedCamp.location}
                       </p>
                     </div>
                   )}
+                </div>
 
-                  {/* Donation Date and Time Slot */}
-                  <div className="border-t border-gray-700 pt-6 mt-6">
-                    <h3 className="text-lg font-semibold text-white mb-4">🩸 Donation Details</h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div>
-                        <label className="block text-sm font-semibold text-white mb-2">
-                          Preferred Donation Date *
-                        </label>
-                        <input
-                          type="date"
-                          name="donationDate"
-                          value={formData.donationDate}
-                          onChange={handleChange}
-                          min={new Date().toISOString().split('T')[0]}
-                          className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
-                          required
-                        />
-                        {formData.donationDate && (
-                          <p className="text-xs text-green-400 mt-2">
-                            ✅ Next eligible donation: {new Date(new Date(formData.donationDate).getTime() + 90 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+                {/* Donation details */}
+                <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5 sm:p-6">
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15">
+                      <CalendarDays className="h-5 w-5 text-cyan-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">
+                        Donation Details *
+                      </h3>
+                      <p className="text-sm text-gray-400">
+                        Pick your preferred date and available time slot.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Preferred Donation Date
+                      </label>
+                      <input
+                        type="date"
+                        name="donationDate"
+                        value={formData.donationDate}
+                        onChange={handleChange}
+                        min={new Date().toISOString().split("T")[0]}
+                        className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none transition focus:border-rose-500 focus:bg-white/10"
+                        required
+                      />
+                      {formData.donationDate && (
+                        <p className="mt-2 text-xs text-emerald-300">
+                          Next eligible donation:{" "}
+                          {new Date(
+                            new Date(formData.donationDate).getTime() +
+                              90 * 24 * 60 * 60 * 1000,
+                          ).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-medium text-gray-300">
+                        Preferred Time Slot
+                      </label>
+
+                      {!selectedCamp ? (
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                          <p className="text-sm text-gray-400">
+                            Please select a camp first to see available slots.
                           </p>
-                        )}
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-white mb-2">
-                          Preferred Time Slot *
-                        </label>
-                        {!selectedCamp ? (
-                          <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
-                            <p className="text-gray-300 text-sm">Please select a camp first to see available time slots</p>
-                          </div>
-                        ) : slotsLoading ? (
-                          <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg">
-                            <p className="text-gray-300 text-sm">Loading time slots...</p>
-                          </div>
-                        ) : slots.length === 0 ? (
-                          <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                            <p className="text-yellow-300 text-sm">No available time slots for this camp</p>
-                          </div>
-                        ) : (
+                        </div>
+                      ) : slotsLoading ? (
+                        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                          <p className="text-sm text-gray-400">
+                            Loading time slots...
+                          </p>
+                        </div>
+                      ) : slots.length === 0 ? (
+                        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4">
+                          <p className="text-sm text-amber-200">
+                            No available time slots for this camp.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="relative">
                           <select
-                            value={selectedSlot ? selectedSlot._id.toString() : ""}
+                            value={
+                              selectedSlot ? selectedSlot._id.toString() : ""
+                            }
                             onChange={(e) => {
                               const slotId = e.target.value;
-                              const slot = slots.find(s => s._id.toString() === slotId);
-                              if (slot) {
-                                handleSlotSelection(slot);
-                              }
+                              const slot = slots.find(
+                                (s) => s._id.toString() === slotId,
+                              );
+                              if (slot) handleSlotSelection(slot);
                             }}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/50 transition-all"
+                            className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 pr-12 text-white outline-none transition focus:border-rose-500 focus:bg-white/10"
                             required
                           >
-                            <option value="">-- Select a Time Slot --</option>
+                            <option value="" className="bg-slate-950">
+                              -- Select a Time Slot --
+                            </option>
                             {slots.map((slot) => (
-                              <option 
-                                key={slot._id} 
-                                value={slot._id.toString()} 
-                                className="bg-slate-900"
+                              <option
+                                key={slot._id}
+                                value={slot._id.toString()}
+                                className="bg-slate-950"
                                 disabled={slot.availableSpots <= 0}
                               >
-                                {slot.slotTime} ({slot.availableSpots} spots available)
+                                {slot.slotTime} ({slot.availableSpots} spots
+                                available)
                               </option>
                             ))}
                           </select>
-                        )}
-                        {selectedSlot && (
-                          <p className="text-xs text-green-400 mt-2">
-                            ✅ Selected Slot: {selectedSlot.slotTime}
-                          </p>
-                        )}
-                      </div>
+                          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                        </div>
+                      )}
+
+                      {selectedSlot && (
+                        <p className="mt-2 text-xs text-emerald-300">
+                          Selected Slot: {selectedSlot.slotTime}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* Info Box */}
-                <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 mt-6">
-                  <p className="text-sm text-red-300 mb-2">
-                    ℹ️ <strong>Requirements:</strong> You must be 18-65 years old and in good health to donate blood. A valid ID will be required at the time of donation.
+                {/* Info box */}
+                <div className="rounded-[28px] border border-rose-500/20 bg-rose-500/10 p-5">
+                  <p className="text-sm text-rose-100 leading-relaxed">
+                    <strong>Requirements:</strong> You must be 18–65 years old
+                    and in good health to donate blood. A valid ID will be
+                    required at the time of donation.
                   </p>
-                  <p className="text-sm text-green-300">
-                    ✅ <strong>90-Day Rule:</strong> After each donation, you must wait 90 days before your next donation to ensure your health and safety.
+                  <p className="mt-3 text-sm text-emerald-100 leading-relaxed">
+                    <strong>90-Day Rule:</strong> After each donation, you must
+                    wait 90 days before donating again to keep the process safe
+                    for your health.
                   </p>
                 </div>
 
-                {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 disabled:from-gray-600 disabled:to-gray-600 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-2xl hover:shadow-red-500/50 transform hover:scale-105"
+                  className="w-full rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-red-500 px-6 py-4 font-bold text-white shadow-lg shadow-rose-500/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {loading ? "Registering..." : "Complete Registration"}
+                  {loading ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      Registering...
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      Complete Registration
+                      <ArrowRight className="h-5 w-5" />
+                    </span>
+                  )}
                 </button>
 
-                {/* Secondary Action */}
                 <button
                   type="button"
                   onClick={() => navigate("/")}
-                  className="w-full text-center text-gray-300 hover:text-white transition-colors py-2"
+                  className="w-full rounded-2xl border border-white/10 bg-white/5 px-6 py-4 font-semibold text-white transition hover:bg-white/10"
                 >
                   Cancel
                 </button>
               </form>
             </div>
+          </section>
 
-            {/* Footer Info */}
-            <div className="text-center mt-8 text-gray-400 text-sm">
-              <p>Your information is secure and will only be used for donation coordination</p>
-            </div>
+          <div className="mt-8 rounded-[28px] border border-white/10 bg-white/5 px-6 py-5 text-center text-sm text-gray-400 backdrop-blur-xl">
+            Your information is secure and will only be used for donation
+            coordination.
           </div>
-        </div>
+        </main>
       </div>
-
-      <style>{`
-        @keyframes blob {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          33% {
-            transform: translate(30px, -50px) scale(1.1);
-          }
-          66% {
-            transform: translate(-20px, 20px) scale(0.9);
-          }
-        }
-
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-      `}</style>
     </div>
   );
 }

@@ -2,6 +2,22 @@ import { useState } from "react";
 import { checkRegistrationStatus } from "../services/organizationApi";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import {
+  Building2,
+  Search,
+  Copy,
+  ArrowRight,
+  CheckCircle2,
+  Clock3,
+  XCircle,
+  CalendarDays,
+  Hash,
+  ShieldCheck,
+  Sparkles,
+  FileSearch,
+  RefreshCcw,
+  Mail,
+} from "lucide-react";
 
 export default function RegistrationStatus() {
   const navigate = useNavigate();
@@ -12,7 +28,7 @@ export default function RegistrationStatus() {
 
   const handleCheckStatus = async (e) => {
     e.preventDefault();
-    
+
     if (!organizationCode.trim()) {
       setError("Organization code is required");
       return;
@@ -24,7 +40,7 @@ export default function RegistrationStatus() {
 
     try {
       const res = await checkRegistrationStatus(organizationCode);
-      
+
       if (res.data.success) {
         setStatusData(res.data.data);
         toast.success("Status retrieved!");
@@ -41,231 +57,486 @@ export default function RegistrationStatus() {
   const getStatusColor = (status) => {
     switch (status) {
       case "APPROVED":
-        return "bg-green-100 border-green-300 text-green-800";
+        return "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
       case "PENDING":
-        return "bg-yellow-100 border-yellow-300 text-yellow-800";
+        return "bg-amber-500/10 border-amber-500/20 text-amber-300";
       case "REJECTED":
-        return "bg-red-100 border-red-300 text-red-800";
+        return "bg-rose-500/10 border-rose-500/20 text-rose-300";
       default:
-        return "bg-gray-100 border-gray-300 text-gray-800";
+        return "bg-slate-500/10 border-slate-500/20 text-slate-300";
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
       case "APPROVED":
-        return (
-          <svg className="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-        );
+        return <CheckCircle2 className="h-12 w-12 text-emerald-300" />;
       case "PENDING":
-        return (
-          <svg className="w-12 h-12 text-yellow-600 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        );
+        return <Clock3 className="h-12 w-12 text-amber-300" />;
       case "REJECTED":
-        return (
-          <svg className="w-12 h-12 text-red-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-          </svg>
-        );
+        return <XCircle className="h-12 w-12 text-rose-300" />;
       default:
-        return null;
+        return <ShieldCheck className="h-12 w-12 text-slate-300" />;
     }
   };
 
+  const statusLabel =
+    statusData?.status === "APPROVED"
+      ? "Approved"
+      : statusData?.status === "PENDING"
+        ? "Pending Review"
+        : statusData?.status === "REJECTED"
+          ? "Rejected"
+          : "Unknown";
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 p-4 py-12">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Registration Status</h1>
-          <p className="text-blue-100">Check your organization registration status</p>
-        </div>
+    <div className="min-h-screen overflow-hidden bg-[#031014] text-white relative">
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-cyan-500/10 blur-3xl" />
+        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-teal-500/10 blur-3xl" />
+      </div>
 
-        {/* Status Check Form */}
-        <div className="bg-white rounded-lg shadow-2xl p-8 mb-8">
-          <form onSubmit={handleCheckStatus} className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Organization Code
-              </label>
-              <input
-                type="text"
-                value={organizationCode}
-                onChange={(e) => {
-                  setOrganizationCode(e.target.value);
-                  setError("");
-                }}
-                placeholder="e.g., HOSP-DEL-001"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                You received this code when you registered
-              </p>
-            </div>
-
-            {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-600 text-sm font-medium">{error}</p>
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {loading ? "Checking..." : "Check Status"}
-            </button>
-          </form>
-        </div>
-
-        {/* Status Display */}
-        {statusData && (
-          <div className="bg-white rounded-lg shadow-2xl p-8">
-            <div className="text-center mb-6">
-              <div className="flex justify-center mb-4">
-                {getStatusIcon(statusData.status)}
-              </div>
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                {statusData.name}
-              </h2>
-              <p className={`inline-block px-6 py-2 rounded-full border-2 font-semibold text-lg ${getStatusColor(statusData.status)}`}>
-                {statusData.status}
-              </p>
-            </div>
-
-            {/* Status Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <p className="text-xs text-gray-600 uppercase font-semibold mb-1">
-                  Organization Code
-                </p>
-                <p className="text-lg font-bold text-gray-800 font-mono">
-                  {statusData.organizationCode}
-                </p>
-              </div>
-
-              <div className="border rounded-lg p-4 bg-gray-50">
-                <p className="text-xs text-gray-600 uppercase font-semibold mb-1">
-                  Registration Date
-                </p>
-                <p className="text-lg font-bold text-gray-800">
-                  {new Date(statusData.registrationDate).toLocaleDateString()}
-                </p>
-              </div>
-
-              {statusData.approvalDate && (
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <p className="text-xs text-gray-600 uppercase font-semibold mb-1">
-                    Approval Date
-                  </p>
-                  <p className="text-lg font-bold text-green-600">
-                    {new Date(statusData.approvalDate).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Status-Specific Messages */}
-            {statusData.status === "APPROVED" && (
-              <div className="bg-green-50 border-2 border-green-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-green-800 mb-2">
-                  ✅ Congratulations! Your registration has been approved!
-                </h3>
-                <p className="text-green-700 mb-4">
-                  Your organization is now active and ready to use the system. You can now login with your admin credentials.
-                </p>
-                <div className="bg-white rounded p-3 text-sm text-gray-700">
-                  <p><strong>Login Instructions:</strong></p>
-                  <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>Visit the login page</li>
-                    <li>Organization Code: {statusData.organizationCode}</li>
-                    <li>Use the admin email you provided during registration</li>
-                    <li>Use the admin password you set</li>
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {statusData.status === "PENDING" && (
-              <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-yellow-800 mb-2">
-                  ⏳ Your registration is pending review
-                </h3>
-                <p className="text-yellow-700">
-                  Our superadmin team is reviewing your application. This typically takes 24-48 hours. Please check back later or refresh this page to see updates.
-                </p>
-              </div>
-            )}
-
-            {statusData.status === "REJECTED" && (
-              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-red-800 mb-2">
-                  ❌ Your registration has been rejected
-                </h3>
-                <p className="text-red-700 mb-4">
-                  Please contact the superadmin team for more information about why your application was rejected.
-                </p>
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-4">
+      <div className="relative z-10">
+        <header className="sticky top-0 z-50 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex h-20 items-center justify-between">
               <button
-                onClick={() => {
-                  navigator.clipboard.writeText(statusData.organizationCode);
-                  toast.success("Organization code copied!");
-                }}
-                className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+                onClick={() => navigate("/")}
+                className="flex items-center gap-3 group"
               >
-                Copy Code
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-full bg-emerald-500/30 blur-2xl" />
+                  <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/20">
+                    <Building2 className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+
+                <div className="text-left leading-tight">
+                  <span className="block text-lg sm:text-xl font-extrabold tracking-tight text-white">
+                    BloodBridge
+                  </span>
+                  <span className="block text-xs sm:text-sm text-gray-400">
+                    Registration status portal
+                  </span>
+                </div>
               </button>
-              {statusData.status === "APPROVED" && (
+
+              <button
+                onClick={() => navigate("/organization")}
+                className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
+              >
+                Organization Portal
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
+          <section className="grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
+            {/* Left panel */}
+            <div className="rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-2 text-sm text-emerald-300">
+                <Sparkles className="h-4 w-4" />
+                Track your organization in real time
+              </div>
+
+              <h1 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
+                Check registration status
+              </h1>
+
+              <p className="mt-4 max-w-2xl text-lg text-gray-400 leading-relaxed">
+                Enter your organization code to see whether your application is
+                approved, pending, or rejected. The portal shows the code,
+                registration date, and the next action clearly.
+              </p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="text-xs text-gray-400">Status</div>
+                  <div className="mt-2 font-semibold text-white">
+                    Live verification
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="text-xs text-gray-400">Time</div>
+                  <div className="mt-2 font-semibold text-white">
+                    24–48 hour review
+                  </div>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="text-xs text-gray-400">Access</div>
+                  <div className="mt-2 font-semibold text-white">
+                    Approval based
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-10 space-y-4">
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-500/15">
+                    <Hash className="h-5 w-5 text-emerald-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Find your code</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Use the organization code you received after registration.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-500/15">
+                    <Clock3 className="h-5 w-5 text-cyan-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Check progress</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      See whether your registration is still pending review or
+                      already approved.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+                  <div className="mt-1 flex h-11 w-11 items-center justify-center rounded-xl bg-teal-500/15">
+                    <ShieldCheck className="h-5 w-5 text-teal-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Proceed safely</p>
+                    <p className="mt-1 text-sm text-gray-400">
+                      Approved organizations can move straight to the login
+                      page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Form panel */}
+            <div className="rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-400">Status lookup</p>
+                    <h2 className="mt-2 text-3xl font-black text-white">
+                      Organization Code
+                    </h2>
+                  </div>
+
+                  <div className="hidden sm:flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/15">
+                    <FileSearch className="h-7 w-7 text-emerald-300" />
+                  </div>
+                </div>
+              </div>
+
+              <form onSubmit={handleCheckStatus} className="space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-gray-300">
+                    Organization Code
+                  </label>
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
+                    <input
+                      type="text"
+                      value={organizationCode}
+                      onChange={(e) => {
+                        setOrganizationCode(e.target.value);
+                        setError("");
+                      }}
+                      placeholder="e.g. HOSP-DEL-001"
+                      className="w-full rounded-2xl border border-white/10 bg-white/5 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-emerald-500 focus:bg-white/10"
+                    />
+                  </div>
+                  <p className="mt-2 text-xs text-gray-500">
+                    The code was given during registration.
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4">
+                    <p className="text-sm font-medium text-rose-200">{error}</p>
+                  </div>
+                )}
+
                 <button
-                  onClick={() => navigate("/login")}
-                  className="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-6 py-4 font-bold text-white shadow-lg shadow-emerald-500/20 transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Go to Login
+                  {loading ? (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 rounded-full border-2 border-white border-t-transparent animate-spin" />
+                      Checking...
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center justify-center gap-2">
+                      Check Status
+                      <ArrowRight className="h-5 w-5" />
+                    </span>
+                  )}
                 </button>
-              )}
-              <button
-                onClick={() => {
-                  setOrganizationCode("");
-                  setStatusData(null);
-                  setError("");
-                }}
-                className="flex-1 bg-gray-600 text-white py-3 rounded-lg font-semibold hover:bg-gray-700 transition"
-              >
-                Check Another Code
-              </button>
-            </div>
-          </div>
-        )}
+              </form>
 
-        {/* Help Section */}
-        {!statusData && (
-          <div className="bg-white rounded-lg shadow-2xl p-8">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">Need Help?</h3>
-            <div className="space-y-4 text-gray-700">
-              <div>
-                <p className="font-semibold text-gray-800">Where to find your code:</p>
-                <p>You received your Organization Code when you completed the registration form.</p>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">Registration Timeline:</p>
-                <p>Applications are typically reviewed within 24-48 hours. You'll receive an email notification when your status changes.</p>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800">Can't find your code?</p>
-                <p>Contact our support team for assistance.</p>
+              <div className="mt-8 rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 flex h-9 w-9 items-center justify-center rounded-xl bg-white/10">
+                    <Mail className="h-4 w-4 text-gray-300" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Need your code?</p>
+                    <p className="mt-1 text-sm leading-relaxed text-gray-400">
+                      Check the confirmation email or the registration success
+                      screen.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          </section>
+
+          {statusData && (
+            <section className="mt-8 grid gap-8 lg:grid-cols-[1.02fr_0.98fr]">
+              {/* Status result */}
+              <div className="rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+                <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10">
+                      {getStatusIcon(statusData.status)}
+                    </div>
+
+                    <div>
+                      <h2 className="text-3xl font-black text-white">
+                        {statusData.name}
+                      </h2>
+                      <p className="mt-1 text-gray-400">
+                        Registration status overview
+                      </p>
+                    </div>
+                  </div>
+
+                  <p
+                    className={`inline-flex items-center rounded-full border px-5 py-2 text-sm font-semibold ${getStatusColor(
+                      statusData.status,
+                    )}`}
+                  >
+                    {statusLabel}
+                  </p>
+                </div>
+
+                <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Organization Code
+                    </p>
+                    <p className="mt-2 break-all font-mono text-lg font-bold text-white">
+                      {statusData.organizationCode}
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                    <p className="text-xs uppercase tracking-wide text-gray-400">
+                      Registration Date
+                    </p>
+                    <p className="mt-2 text-lg font-bold text-white">
+                      {new Date(
+                        statusData.registrationDate,
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  {statusData.approvalDate && (
+                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5 sm:col-span-2">
+                      <p className="text-xs uppercase tracking-wide text-gray-400">
+                        Approval Date
+                      </p>
+                      <p className="mt-2 text-lg font-bold text-emerald-300">
+                        {new Date(statusData.approvalDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  className={`mt-8 rounded-[28px] border p-6 ${getStatusColor(
+                    statusData.status,
+                  )}`}
+                >
+                  {statusData.status === "APPROVED" && (
+                    <>
+                      <h3 className="text-lg font-black text-emerald-200">
+                        Your registration has been approved
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-emerald-100/90">
+                        Your organization is active and ready for login. Use the
+                        admin credentials you created during registration.
+                      </p>
+                    </>
+                  )}
+
+                  {statusData.status === "PENDING" && (
+                    <>
+                      <h3 className="text-lg font-black text-amber-200">
+                        Your registration is pending review
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-amber-100/90">
+                        The superadmin team is reviewing your application. This
+                        usually takes 24–48 hours.
+                      </p>
+                    </>
+                  )}
+
+                  {statusData.status === "REJECTED" && (
+                    <>
+                      <h3 className="text-lg font-black text-rose-200">
+                        Your registration has been rejected
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-rose-100/90">
+                        Please contact the superadmin team for more information
+                        and next steps.
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Actions panel */}
+              <div className="rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+                <h3 className="text-3xl font-black text-white">Next actions</h3>
+                <p className="mt-3 text-gray-400 leading-relaxed">
+                  Quick actions based on your current registration status.
+                </p>
+
+                <div className="mt-8 space-y-4">
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
+                        <Copy className="h-4 w-4 text-gray-300" />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-white">
+                          Copy organization code
+                        </p>
+                        <p className="mt-1 text-sm text-gray-400">
+                          Keep the code safe for future login and support.
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          statusData.organizationCode,
+                        );
+                        toast.success("Organization code copied!");
+                      }}
+                      className="mt-5 w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-3 font-semibold text-white transition hover:bg-white/10"
+                    >
+                      Copy Code
+                    </button>
+                  </div>
+
+                  {statusData.status === "APPROVED" && (
+                    <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+                      <p className="font-semibold text-emerald-200">
+                        Approved organizations can log in now
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-emerald-100/90">
+                        Go to the login page and access your dashboard using
+                        your admin credentials.
+                      </p>
+
+                      <button
+                        onClick={() => navigate("/login")}
+                        className="mt-5 w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 py-3 font-bold text-white transition hover:scale-[1.02]"
+                      >
+                        Go to Login
+                      </button>
+                    </div>
+                  )}
+
+                  {statusData.status === "PENDING" && (
+                    <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+                      <p className="font-semibold text-amber-200">
+                        Still waiting for review
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-amber-100/90">
+                        Check back later or refresh this page to see updates
+                        from the superadmin team.
+                      </p>
+                    </div>
+                  )}
+
+                  {statusData.status === "REJECTED" && (
+                    <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-5">
+                      <p className="font-semibold text-rose-200">
+                        Need help with rejection?
+                      </p>
+                      <p className="mt-2 text-sm leading-relaxed text-rose-100/90">
+                        Contact the superadmin team for clarification or
+                        resubmission steps.
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => {
+                      setOrganizationCode("");
+                      setStatusData(null);
+                      setError("");
+                    }}
+                    className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+                  >
+                    Check Another Code
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {!statusData && (
+            <section className="mt-8 rounded-[36px] border border-white/10 bg-white/5 p-8 sm:p-10 backdrop-blur-2xl shadow-2xl">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10">
+                  <RefreshCcw className="h-5 w-5 text-gray-300" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-black text-white">Need help?</h3>
+                  <p className="mt-1 text-gray-400">
+                    A few quick notes before you check the status.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                  <p className="font-semibold text-white">
+                    Where to find the code
+                  </p>
+                  <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                    The code was shown after registration and can also be found
+                    in the confirmation details.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                  <p className="font-semibold text-white">Review timeline</p>
+                  <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                    Applications are typically reviewed within 24–48 hours.
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-5">
+                  <p className="font-semibold text-white">Approved next step</p>
+                  <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                    Once approved, use the login page with your organization
+                    code and admin credentials.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+        </main>
       </div>
     </div>
   );

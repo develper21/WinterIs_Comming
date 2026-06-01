@@ -23,15 +23,16 @@ import {
   XCircle,
   RefreshCw,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import toast from "react-hot-toast";
 
 const API = {
-  overview: "http://localhost:5000/api/superadmin/dashboard/overview",
-  pending: "http://localhost:5000/api/superadmin/organizations/pending",
-  organizations: "http://localhost:5000/api/superadmin/organizations?limit=6",
-  activity: "http://localhost:5000/api/superadmin/activity?limit=8",
-  health: "http://localhost:5000/api/superadmin/system-health",
+  overview: "http://localhost:5000/api/admin/dashboard/overview",
+  pending: "http://localhost:5000/api/admin/approvals/pending/all",
+  organizations: "http://localhost:5000/api/admin/approvals/pending/all?limit=6",
+  allOrganizations: "http://localhost:5000/api/auth/org/all?limit=6",
+  activity: "http://localhost:5000/api/admin/dashboard/activity?limit=8",
+  health: "http://localhost:5000/api/admin/dashboard/health",
 };
 
 const safeArray = (value) => (Array.isArray(value) ? value : []);
@@ -97,60 +98,83 @@ export default function Dashboard() {
   const loadDashboard = async () => {
     setError("");
     try {
-      const [overviewRes, pendingRes, orgRes, activityRes, healthRes] =
+      const [overviewRes, pendingRes, orgRes, allOrgRes, activityRes, healthRes] =
         await Promise.allSettled([
           api.get(API.overview),
           api.get(API.pending),
           api.get(API.organizations),
+          api.get(API.allOrganizations),
           api.get(API.activity),
           api.get(API.health),
         ]);
 
       if (overviewRes.status === "fulfilled") {
-        const data =
-          overviewRes.value.data?.data || overviewRes.value.data || {};
+        const data = overviewRes.value.data?.data || {};
         setOverview((prev) => ({
           ...prev,
-          ...data,
+          totalOrganizations: data.organizations?.total || 0,
+          pendingApprovals: data.organizations?.pending || 0,
+          activeUsers: data.users?.total || 0,
+          bloodBanks: data.organizations?.bloodBanks || 0,
+          hospitals: data.organizations?.hospitals || 0,
+          ngos: data.organizations?.ngos || 0,
         }));
       }
 
       if (pendingRes.status === "fulfilled") {
-        const data = pendingRes.value.data?.data || pendingRes.value.data || {};
+        const data = pendingRes.value.data?.data || {};
         setPendingOrganizations(
           safeArray(
             data.items ||
               data.organizations ||
               data.pendingOrganizations ||
-              data,
+              data.hospitals ||
+              data.bloodBanks ||
+              data.ngos ||
+              [],
           ),
         );
       }
 
       if (orgRes.status === "fulfilled") {
-        const data = orgRes.value.data?.data || orgRes.value.data || {};
-        setOrganizations(safeArray(data.items || data.organizations || data));
+        const orgData = orgRes.value.data?.data || {};
+        // Use the organizations from pending approvals endpoint
+        setOrganizations(safeArray(orgData.organizations || []));
+      }
+
+      if (allOrgRes.status === "fulfilled") {
+        const allOrgData = allOrgRes.value.data?.data || {};
+        // Use all organizations for the recent organizations section
+        setOrganizations(safeArray(allOrgData.organizations || allOrgData.items || []));
       }
 
       if (activityRes.status === "fulfilled") {
-        const data =
-          activityRes.value.data?.data || activityRes.value.data || {};
+        const data = activityRes.value.data?.data || {};
         setRecentActivity(
-          safeArray(data.items || data.activities || data.logs || data),
+          safeArray(data.logs || data.activities || data.items || []),
         );
       }
 
       if (healthRes.status === "fulfilled") {
-        const data = healthRes.value.data?.data || healthRes.value.data || {};
-        setSystemHealth(
-          safeArray(data.items || data.checks || data.services || data),
-        );
+        const data = healthRes.value.data?.data || {};
+        const healthChecks = [];
+        if (data.collections) {
+          Object.entries(data.collections).forEach(([key, value]) => {
+            healthChecks.push({
+              name: key,
+              status: value.status,
+              details: `${value.documentCount || 0} documents`,
+            });
+          });
+        }
+        setSystemHealth(healthChecks);
       }
 
       const failed = [
         overviewRes,
         pendingRes,
         orgRes,
+        allOrgRes,
         activityRes,
         healthRes,
       ].some((result) => result.status === "rejected");
@@ -159,10 +183,14 @@ export default function Dashboard() {
         setError(
           "Some dashboard panels could not be loaded. Check the backend route names in the API block.",
         );
+        toast.error("Some dashboard data failed to load");
+      } else {
+        toast.success("Dashboard refreshed successfully");
       }
     } catch (err) {
       console.error("Dashboard load error:", err);
       setError("Failed to load superadmin dashboard.");
+      toast.error("Failed to load dashboard");
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -188,6 +216,7 @@ export default function Dashboard() {
       localStorage.removeItem("auth");
       localStorage.removeItem("authToken");
       localStorage.removeItem("superadmin");
+      toast.success("Logged out successfully");
     } finally {
       navigate("/superadmin-login", { replace: true });
     }
@@ -263,136 +292,8 @@ export default function Dashboard() {
         <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
       </div>
 
-      <div className="relative z-10 flex min-h-screen">
-        {/* Sidebar */}
-        <aside className="hidden xl:flex w-[320px] flex-col border-r border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="px-7 py-8 border-b border-white/10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-300">
-              <Sparkles className="h-4 w-4" />
-              Superadmin Control
-            </div>
-
-            <h2 className="mt-5 text-3xl font-black leading-tight text-white">
-              BloodBridge
-            </h2>
-            <p className="mt-2 text-sm text-gray-400">
-              Central administration portal
-            </p>
-          </div>
-
-          <nav className="flex-1 px-5 py-6 space-y-2">
-            {[
-              {
-                label: "Dashboard Overview",
-                icon: LayoutDashboard,
-                active: true,
-                path: "/superadmin/dashboard",
-              },
-              {
-                label: "Approvals",
-                icon: BadgeCheck,
-                active: false,
-                path: "/superadmin/approvals",
-              },
-              {
-                label: "Organizations",
-                icon: Building2,
-                active: false,
-                path: "/superadmin/organizations",
-              },
-              {
-                label: "Activity Logs",
-                icon: FileText,
-                active: false,
-                path: "/superadmin/activity",
-              },
-              {
-                label: "System Health",
-                icon: ShieldCheck,
-                active: false,
-                path: "/superadmin/system-health",
-              },
-              {
-                label: "Users",
-                icon: UserRound,
-                active: false,
-                path: "/superadmin/users",
-              },
-              {
-                label: "Settings",
-                icon: Settings,
-                active: false,
-                path: "/superadmin/settings",
-              },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <button
-                  key={item.label}
-                  onClick={() => navigate(item.path)}
-                  className={`w-full flex items-center gap-3 rounded-2xl px-4 py-3 text-left transition ${
-                    item.active
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium">{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
-          <div className="p-5 border-t border-white/10">
-            <button
-              onClick={handleLogout}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </button>
-          </div>
-        </aside>
-
-        {/* Main */}
-        <main className="flex-1">
-          {/* Header */}
-          <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-            <div className="px-4 sm:px-6 lg:px-8">
-              <div className="flex h-20 items-center justify-between gap-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.35em] text-red-400">
-                    Superadmin Dashboard
-                  </p>
-                  <h1 className="text-xl sm:text-2xl font-black text-white">
-                    Network Control Center
-                  </h1>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleRefresh}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <RefreshCw
-                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                    />
-                    Refresh
-                  </button>
-
-                  <button
-                    onClick={handleLogout}
-                    className="hidden sm:inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 to-rose-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-red-500/20 transition hover:scale-[1.02]"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
-                </div>
-              </div>
-            </div>
-          </header>
-
-          <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
+      <div className="relative z-10">
+        <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
             {/* Hero */}
             <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
               <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-red-500/20 blur-3xl" />
@@ -424,6 +325,14 @@ export default function Dashboard() {
                   <p className="mt-1 text-sm text-gray-400">
                     {user?.email || "admin@platform.com"}
                   </p>
+                  <button
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+                    {refreshing ? 'Refreshing...' : 'Refresh Dashboard'}
+                  </button>
                 </div>
               </div>
             </section>
@@ -494,7 +403,7 @@ export default function Dashboard() {
                   </div>
 
                   <button
-                    onClick={() => navigate("/superadmin/approvals")}
+                    onClick={() => navigate("/superadmin/dashboard/approvals")}
                     className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
                   >
                     View all
@@ -580,6 +489,70 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-6">
+                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm uppercase tracking-[0.25em] text-violet-400">
+                        Recent organizations
+                      </p>
+                      <h3 className="mt-2 text-2xl font-black text-white">
+                        Latest registrations
+                      </h3>
+                    </div>
+                    <button
+                      onClick={() => navigate("/superadmin/organizations")}
+                      className="text-sm text-gray-300 hover:text-white"
+                    >
+                      View all
+                    </button>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    {loading
+                      ? Array.from({ length: 3 }).map((_, i) => (
+                          <div
+                            key={i}
+                            className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
+                          >
+                            <div className="h-4 w-32 rounded bg-white/10" />
+                            <div className="mt-2 h-3 w-24 rounded bg-white/10" />
+                          </div>
+                        ))
+                      : (organizations.length > 0
+                          ? organizations.slice(0, 3)
+                          : [
+                              {
+                                name: "City Blood Bank",
+                                type: "Blood Bank",
+                                city: "Mumbai",
+                              },
+                              {
+                                name: "General Hospital",
+                                type: "Hospital",
+                                city: "Delhi",
+                              },
+                              {
+                                name: "Healthcare NGO",
+                                type: "NGO",
+                                city: "Bangalore",
+                              },
+                            ]
+                        ).map((org, idx) => (
+                          <div
+                            key={org._id || org.id || idx}
+                            className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
+                          >
+                            <p className="font-semibold text-white">
+                              {org.organizationName || org.name || "Organization"}
+                            </p>
+                            <p className="mt-1 text-sm text-gray-400">
+                              {org.organizationType || org.type || "Organization"} • {org.city || org.location?.city || "Unknown"}
+                            </p>
+                          </div>
+                        ))}
+                  </div>
+                </div>
+
                 <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
                   <div className="flex items-center justify-between">
                     <div>
@@ -845,8 +818,7 @@ export default function Dashboard() {
               </button>
             </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
   );
 }

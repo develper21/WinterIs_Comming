@@ -30,10 +30,10 @@ import { useAuth } from "../../context/AuthContext";
 const API_BASE = "http://localhost:5000";
 
 const ENDPOINTS = {
-  pendingOrganizations: "/api/superadmin/organizations/pending",
-  organizationDetails: (id) => `/api/superadmin/organizations/${id}`,
-  approveOrganization: (id) => `/api/superadmin/organizations/${id}/approve`,
-  rejectOrganization: (id) => `/api/superadmin/organizations/${id}/reject`,
+  pendingOrganizations: "/api/admin/approvals/pending/all",
+  organizationDetails: (id) => `/api/admin/approvals/${id}`,
+  approveOrganization: "/api/admin/approvals/approve",
+  rejectOrganization: "/api/admin/approvals/reject",
 };
 
 const TYPE_OPTIONS = [
@@ -200,16 +200,19 @@ export default function Approvals() {
   const handleApprove = async () => {
     if (!selectedOrganization) return;
 
-    const id = selectedOrganization._id || selectedOrganization.id;
+    const organizationCode = selectedOrganization.organizationCode || selectedOrganization.registrationCode;
     setProcessing(true);
 
     try {
-      const res = await api.post(ENDPOINTS.approveOrganization(id), {});
+      const res = await api.post(ENDPOINTS.approveOrganization, {
+        organizationCode,
+        approvalRemarks: "Approved by Superadmin"
+      });
       toast.success(res.data?.message || "Organization approved successfully");
       setShowApproveModal(false);
       setSelectedOrganization(null);
       await loadPendingOrganizations();
-      if (selectedDetails?._id === id || selectedDetails?.id === id) {
+      if (selectedDetails?._id === selectedOrganization._id || selectedDetails?.id === selectedOrganization.id) {
         setSelectedDetails((prev) =>
           prev ? { ...prev, status: "APPROVED" } : prev,
         );
@@ -227,7 +230,7 @@ export default function Approvals() {
   const handleReject = async () => {
     if (!selectedOrganization) return;
 
-    const id = selectedOrganization._id || selectedOrganization.id;
+    const organizationCode = selectedOrganization.organizationCode || selectedOrganization.registrationCode;
     if (!rejectReason.trim()) {
       toast.error("Please provide a rejection reason");
       return;
@@ -236,15 +239,16 @@ export default function Approvals() {
     setProcessing(true);
 
     try {
-      const res = await api.post(ENDPOINTS.rejectOrganization(id), {
-        reason: rejectReason.trim(),
+      const res = await api.post(ENDPOINTS.rejectOrganization, {
+        organizationCode,
+        rejectionReason: rejectReason.trim(),
       });
       toast.success(res.data?.message || "Organization rejected successfully");
       setShowRejectModal(false);
       setSelectedOrganization(null);
       setRejectReason("");
       await loadPendingOrganizations();
-      if (selectedDetails?._id === id || selectedDetails?.id === id) {
+      if (selectedDetails?._id === selectedOrganization._id || selectedDetails?.id === selectedOrganization.id) {
         setSelectedDetails((prev) =>
           prev ? { ...prev, status: "REJECTED" } : prev,
         );

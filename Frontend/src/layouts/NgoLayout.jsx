@@ -27,7 +27,11 @@ function NgoShell() {
     { label: "Total Camps", value: stats.totalCamps, meta: "Portfolio" },
     { label: "Active", value: stats.active, meta: "On-ground" },
     { label: "Upcoming", value: stats.upcoming, meta: "Next 30 days" },
-    { label: "Registered Donors", value: stats.totalRegistered, meta: "Confirmed" },
+    {
+      label: "Registered Donors",
+      value: stats.totalRegistered,
+      meta: "Confirmed",
+    },
   ];
 
   useEffect(() => {
@@ -38,10 +42,12 @@ function NgoShell() {
     <>
       <div>
         <p className="text-xs uppercase tracking-wider text-white/70 font-medium">
-          SEBN
+          BloodgBridge
         </p>
         <h1 className="mt-3 text-2xl font-bold">NGO Command</h1>
-        <p className="text-sm text-white/80 mt-1">Smart Emergency Blood Network</p>
+        <p className="text-sm text-white/80 mt-1">
+          Smart Emergency Blood Network
+        </p>
       </div>
 
       <nav className="space-y-1">

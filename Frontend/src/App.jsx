@@ -28,6 +28,16 @@ import NgoSlots from "./pages/ngo/SlotManagement";
 import NgoDonors from "./pages/ngo/DonorRegistry";
 import NgoConnectivity from "./pages/ngo/ConnectivityGrid";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SuperAdminLayout from "./layouts/SuperAdminLayout";
+import SuperAdminDashboard from "./pages/superadmin/Dashboard";
+import SuperAdminApprovals from "./pages/superadmin/Approvals";
+import SuperAdminOrganizations from "./pages/superadmin/Organizations";
+import SuperAdminOrganizationDetails from "./pages/superadmin/OrganizationDetails";
+import SuperAdminStats from "./pages/superadmin/Stats";
+import SuperAdminUsers from "./pages/superadmin/Users";
+import SuperAdminActivity from "./pages/superadmin/Activity";
+import SuperAdminSystemHealth from "./pages/superadmin/SystemHealth";
+import SuperAdminSettings from "./pages/superadmin/Settings";
 
 // #region RoutesManager
 export default function App() {
@@ -119,20 +129,26 @@ export default function App() {
           <Route path="connectivity" element={<NgoConnectivity />} />
         </Route>
 
-        {/* Superadmin Dashboard - Placeholder */}
+        {/* Superadmin Dashboard - Protected Routes */}
         <Route
           path="/superadmin/dashboard"
           element={
             <ProtectedRoute allowedRoles={["SUPERADMIN"]}>
-              <div className="min-h-screen flex items-center justify-center bg-gray-100">
-                <div className="text-center">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4">Superadmin Dashboard</h1>
-                  <p className="text-gray-600">Coming soon...</p>
-                </div>
-              </div>
+              <SuperAdminLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Navigate to="/superadmin/dashboard/overview" replace />} />
+          <Route path="overview" element={<SuperAdminDashboard />} />
+          <Route path="approvals" element={<SuperAdminApprovals />} />
+          <Route path="organizations" element={<SuperAdminOrganizations />} />
+          <Route path="organizations/:id" element={<SuperAdminOrganizationDetails />} />
+          <Route path="stats" element={<SuperAdminStats />} />
+          <Route path="users" element={<SuperAdminUsers />} />
+          <Route path="activity" element={<SuperAdminActivity />} />
+          <Route path="health" element={<SuperAdminSystemHealth />} />
+          <Route path="settings" element={<SuperAdminSettings />} />
+        </Route>
       </Routes>
     </>
   );

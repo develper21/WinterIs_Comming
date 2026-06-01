@@ -15,7 +15,7 @@ export const createSuperAdminLogin = async (req, res) => {
     }
 
     const db = getDB();
-    const admin = await db.collection("admins").findOne({ email });
+    const admin = await db.collection("admins").findOne({ email: email.toLowerCase() });
 
     if (!admin) {
       return res.status(401).json({

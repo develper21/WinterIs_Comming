@@ -28,10 +28,10 @@ import { useAuth } from "../../context/AuthContext";
 const API_BASE = "http://localhost:5000";
 
 const ENDPOINTS = {
-  organizations: "/api/superadmin/organizations",
-  organizationDetails: (id) => `/api/superadmin/organizations/${id}`,
-  suspendOrganization: (id) => `/api/superadmin/organizations/${id}/suspend`,
-  deleteOrganization: (id) => `/api/superadmin/organizations/${id}`,
+  organizations: "/api/admin/approvals/pending/all",
+  organizationDetails: (id) => `/api/admin/approvals/${id}`,
+  suspendOrganization: "/api/admin/approvals/suspend",
+  deleteOrganization: (id) => `/api/admin/approvals/${id}`,
 };
 
 const STATUS_OPTIONS = [

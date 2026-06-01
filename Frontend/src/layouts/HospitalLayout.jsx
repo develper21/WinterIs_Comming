@@ -33,14 +33,17 @@ export default function HospitalLayout() {
   useEffect(() => {
     const fetchHospitalData = async () => {
       try {
-        const organizationId = localStorage.getItem('organizationId');
+        const organizationId = localStorage.getItem("organizationId");
         if (organizationId) {
           const response = await getHospitalById(organizationId);
           setHospital(response.data.data);
-          console.log('[LAYOUT] Hospital data loaded:', response.data.data.name);
+          console.log(
+            "[LAYOUT] Hospital data loaded:",
+            response.data.data.name,
+          );
         }
       } catch (error) {
-        console.error('[LAYOUT] Error fetching hospital:', error);
+        console.error("[LAYOUT] Error fetching hospital:", error);
       } finally {
         setLoading(false);
       }
@@ -57,10 +60,12 @@ export default function HospitalLayout() {
     <>
       <div>
         <p className="text-xs uppercase tracking-wider text-white/70 font-medium">
-          SEBN
+          BloodgBridge
         </p>
         <h1 className="mt-3 text-2xl font-bold">Hospital Hub</h1>
-        <p className="text-sm text-white/80 mt-1">Smart Emergency Blood Network</p>
+        <p className="text-sm text-white/80 mt-1">
+          Smart Emergency Blood Network
+        </p>
       </div>
 
       <nav className="space-y-1">
@@ -115,16 +120,17 @@ export default function HospitalLayout() {
                 </button>
                 <div>
                   <p className="text-xs uppercase tracking-wider text-red-700 font-bold">
-                    {loading ? 'Loading...' : (hospital?.city || 'City')}
+                    {loading ? "Loading..." : hospital?.city || "City"}
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-3">
                     <h2 className="text-2xl font-bold text-gray-900">
-                      {loading ? 'Loading...' : (hospital?.name || 'Hospital')}
+                      {loading ? "Loading..." : hospital?.name || "Hospital"}
                     </h2>
                     {hospital && (
                       <span
                         className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                          statusBadgeStyles[hospital.verificationStatus] || statusBadgeStyles.PENDING
+                          statusBadgeStyles[hospital.verificationStatus] ||
+                          statusBadgeStyles.PENDING
                         }`}
                       >
                         {hospital.verificationStatus}

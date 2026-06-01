@@ -21,7 +21,7 @@ import {
   Server,
   ShieldCheck,
   Sparkles,
-  Activity,
+  Activity as ActivityIcon,
   Cpu,
   MemoryStick,
   Thermometer,
@@ -32,8 +32,7 @@ import {
   Loader2,
   BarChart3,
   CircleDashed,
-  CircleCheckBig,
-  CircleOff,
+  CheckCircle,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 

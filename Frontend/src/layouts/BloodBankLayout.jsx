@@ -1,4 +1,4 @@
- import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
@@ -37,7 +37,7 @@ export default function BloodBankLayout() {
     <>
       <div>
         <p className="text-xs uppercase tracking-wider text-white/70 font-medium">
-          SEBN
+          BloodgBridge
         </p>
         <h1 className="mt-3 text-2xl font-bold">{organizationName}</h1>
         <p className="text-sm text-white/80 mt-1">Blood Bank Command Deck</p>

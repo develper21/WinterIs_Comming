@@ -131,6 +131,7 @@ ecosystem.config.js
 # Application specific
 uploads/
 public/uploads/
+credentials.txt
 logs/
 *.backup
 *.bak

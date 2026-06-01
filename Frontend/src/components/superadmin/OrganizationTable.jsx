@@ -134,7 +134,7 @@ export default function OrganizationTable({
                 className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700"
               >
                 Organization
-                <SortIcon column="name" />
+                <SortIcon column="name" sortConfig={sortConfig} />
               </button>
             </th>
             <th className="px-6 py-3 text-left">
@@ -143,7 +143,7 @@ export default function OrganizationTable({
                 className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700"
               >
                 Type
-                <SortIcon column="type" />
+                <SortIcon column="type" sortConfig={sortConfig} />
               </button>
             </th>
             <th className="px-6 py-3 text-left">
@@ -152,7 +152,7 @@ export default function OrganizationTable({
                 className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700"
               >
                 Status
-                <SortIcon column="status" />
+                <SortIcon column="status" sortConfig={sortConfig} />
               </button>
             </th>
             <th className="px-6 py-3 text-left">
@@ -161,7 +161,7 @@ export default function OrganizationTable({
                 className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700"
               >
                 Location
-                <SortIcon column="location" />
+                <SortIcon column="location" sortConfig={sortConfig} />
               </button>
             </th>
             <th className="px-6 py-3 text-left">
@@ -170,7 +170,7 @@ export default function OrganizationTable({
                 className="flex items-center gap-2 text-xs font-medium text-gray-500 uppercase tracking-wider hover:text-gray-700"
               >
                 Created
-                <SortIcon column="createdAt" />
+                <SortIcon column="createdAt" sortConfig={sortConfig} />
               </button>
             </th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">

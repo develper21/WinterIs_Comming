@@ -1,13 +1,40 @@
 import express from "express";
-import { login } from "../../controllers/Auth/AuthController.js";
+import { login, register } from "../../controllers/Auth/AuthController.js";
 
 const router = express.Router();
 
 /**
- * Organization User Login
- * POST /api/auth/login
+ * Regular User Registration
+ * POST /api/auth/register
  * 
  * Body:
+ * {
+ *   name: "Aarav Sharma",
+ *   email: "aarav.sharma@bloodbridge.test",
+ *   password: "Aarav@2026",
+ *   role: "User"
+ * }
+ * 
+ * Response:
+ * {
+ *   success: true,
+ *   message: "Registration successful",
+ *   user: { _id, name, email, role, ... }
+ * }
+ */
+router.post("/register", register);
+
+/**
+ * User Login (Regular User or Organization User)
+ * POST /api/auth/login
+ * 
+ * For Regular User:
+ * {
+ *   email: "aarav.sharma@bloodbridge.test",
+ *   password: "Aarav@2026"
+ * }
+ * 
+ * For Organization User:
  * {
  *   organizationCode: "HOSP-DEL-001",
  *   email: "doctor@hospital.com",

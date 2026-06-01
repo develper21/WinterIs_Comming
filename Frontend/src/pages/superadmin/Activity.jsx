@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 import {
   Search,
   Filter,
-  Activity,
+  Activity as ActivityIcon,
   ArrowRight,
   ArrowUpRight,
   Clock3,
@@ -121,7 +121,7 @@ const getActionMeta = (action) => {
     default:
       return {
         label: action || "Other",
-        icon: Activity,
+        icon: ActivityIcon,
         color: "text-gray-300",
         chip: "bg-white/5 border-white/10",
       };
@@ -646,7 +646,7 @@ export default function Activity() {
                   })
                 ) : (
                   <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-10 text-center">
-                    <Activity className="mx-auto h-12 w-12 text-gray-500" />
+                    <ActivityIcon className="mx-auto h-12 w-12 text-gray-500" />
                     <h4 className="mt-4 text-xl font-bold text-white">
                       No activity logs found
                     </h4>
@@ -735,7 +735,7 @@ export default function Activity() {
               <div className="mt-6">
                 {!selectedLog ? (
                   <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-8 text-center">
-                    <Activity className="mx-auto h-12 w-12 text-gray-500" />
+                    <ActivityIcon className="mx-auto h-12 w-12 text-gray-500" />
                     <p className="mt-4 text-gray-400">
                       Click a log to inspect full details.
                     </p>

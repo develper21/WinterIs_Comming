@@ -6,6 +6,8 @@ import {
   getAllOrganizations
 } from "../../controllers/organization/OrganizationRegistrationController.js";
 import adminAuthMiddleware from "../../middleware/adminAuth.middleware.js";
+import superAdminAuthMiddleware from "../../middleware/superAdminAuth.middleware.js";
+import authMiddleware from "../../middleware/auth.middleware.js";
 
 const router = express.Router();
 
@@ -27,14 +29,14 @@ router.get("/status/:organizationCode", getOrganizationStatus);
 
 /**
  * GET /api/auth/all
- * Get all organizations (admin only)
+ * Get all organizations (admin/superadmin only)
  */
-router.get("/all", adminAuthMiddleware, getAllOrganizations);
+router.get("/all", authMiddleware, superAdminAuthMiddleware, getAllOrganizations);
 
 /**
  * GET /api/auth/pending
- * Get all pending organizations (admin only)
+ * Get all pending organizations (admin/superadmin only)
  */
-router.get("/pending", adminAuthMiddleware, getPendingOrganizations);
+router.get("/pending", authMiddleware, superAdminAuthMiddleware, getPendingOrganizations);
 
 export default router;

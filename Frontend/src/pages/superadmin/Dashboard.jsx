@@ -29,7 +29,8 @@ import toast from "react-hot-toast";
 const API = {
   overview: "http://localhost:5000/api/admin/dashboard/overview",
   pending: "http://localhost:5000/api/admin/approvals/pending/all",
-  organizations: "http://localhost:5000/api/admin/approvals/pending/all?limit=6",
+  organizations:
+    "http://localhost:5000/api/admin/approvals/pending/all?limit=6",
   allOrganizations: "http://localhost:5000/api/auth/org/all?limit=6",
   activity: "http://localhost:5000/api/admin/dashboard/activity?limit=8",
   health: "http://localhost:5000/api/admin/dashboard/health",
@@ -98,15 +99,21 @@ export default function Dashboard() {
   const loadDashboard = async () => {
     setError("");
     try {
-      const [overviewRes, pendingRes, orgRes, allOrgRes, activityRes, healthRes] =
-        await Promise.allSettled([
-          api.get(API.overview),
-          api.get(API.pending),
-          api.get(API.organizations),
-          api.get(API.allOrganizations),
-          api.get(API.activity),
-          api.get(API.health),
-        ]);
+      const [
+        overviewRes,
+        pendingRes,
+        orgRes,
+        allOrgRes,
+        activityRes,
+        healthRes,
+      ] = await Promise.allSettled([
+        api.get(API.overview),
+        api.get(API.pending),
+        api.get(API.organizations),
+        api.get(API.allOrganizations),
+        api.get(API.activity),
+        api.get(API.health),
+      ]);
 
       if (overviewRes.status === "fulfilled") {
         const data = overviewRes.value.data?.data || {};
@@ -138,14 +145,14 @@ export default function Dashboard() {
 
       if (orgRes.status === "fulfilled") {
         const orgData = orgRes.value.data?.data || {};
-        // Use the organizations from pending approvals endpoint
         setOrganizations(safeArray(orgData.organizations || []));
       }
 
       if (allOrgRes.status === "fulfilled") {
         const allOrgData = allOrgRes.value.data?.data || {};
-        // Use all organizations for the recent organizations section
-        setOrganizations(safeArray(allOrgData.organizations || allOrgData.items || []));
+        setOrganizations(
+          safeArray(allOrgData.organizations || allOrgData.items || []),
+        );
       }
 
       if (activityRes.status === "fulfilled") {
@@ -227,28 +234,28 @@ export default function Dashboard() {
       title: "Total Organizations",
       value: overview.totalOrganizations,
       icon: Building2,
-      accent: "from-cyan-500 to-blue-500",
+      accent: "from-[#7c0d16] to-[#b71d24]",
       note: "All verified and pending orgs",
     },
     {
       title: "Pending Approvals",
       value: overview.pendingApprovals,
       icon: Clock3,
-      accent: "from-amber-500 to-orange-500",
+      accent: "from-[#d1661c] to-[#f2994a]",
       note: "Waiting for review",
     },
     {
       title: "Active Users",
       value: overview.activeUsers,
       icon: Users,
-      accent: "from-emerald-500 to-teal-500",
+      accent: "from-[#2c8a49] to-[#5ec271]",
       note: "Connected accounts",
     },
     {
       title: "Total Requests",
       value: overview.totalRequests,
       icon: Activity,
-      accent: "from-rose-500 to-pink-500",
+      accent: "from-[#1e5aa8] to-[#6fb1ff]",
       note: "Platform-wide requests",
     },
   ];
@@ -258,567 +265,523 @@ export default function Dashboard() {
       label: "Review Approvals",
       description: "Process pending organization registrations",
       icon: BadgeCheck,
-      path: "/superadmin/approvals",
-      accent: "from-amber-500 to-orange-500",
+      path: "/superadmin/dashboard/approvals",
+      accent: "from-[#d1661c] to-[#f2994a]",
     },
     {
       label: "Manage Organizations",
       description: "View and edit all registered organizations",
       icon: Building2,
-      path: "/superadmin/organizations",
-      accent: "from-cyan-500 to-blue-500",
+      path: "/superadmin/dashboard/organizations",
+      accent: "from-[#7c0d16] to-[#b71d24]",
     },
     {
       label: "Analytics & Stats",
       description: "Track platform performance and trends",
       icon: BarChart3,
-      path: "/superadmin/stats",
-      accent: "from-emerald-500 to-teal-500",
+      path: "/superadmin/dashboard/stats",
+      accent: "from-[#2c8a49] to-[#5ec271]",
     },
     {
       label: "System Settings",
       description: "Update admin and platform configuration",
       icon: Settings,
-      path: "/superadmin/settings",
-      accent: "from-violet-500 to-fuchsia-500",
+      path: "/superadmin/dashboard/settings",
+      accent: "from-[#9b1e27] to-[#d93f42]",
     },
   ];
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-red-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-cyan-500/10 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Overview
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            SuperAdmin Command Center
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Oversee approvals, organizations, and platform health
+          </p>
+        </div>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-6 py-3 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+          />
+          {refreshing ? "Refreshing..." : "Refresh Dashboard"}
+        </button>
       </div>
 
-      <div className="relative z-10">
-        <div className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
-            {/* Hero */}
-            <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-              <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-red-500/20 blur-3xl" />
-              <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
 
-              <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {(loading ? Array.from({ length: 4 }) : stats).map((item, idx) => {
+          if (loading) {
+            return (
+              <div
+                key={idx}
+                className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)] animate-pulse"
+              >
+                <div className="h-4 w-24 rounded bg-[#ffe0e8]" />
+                <div className="mt-5 h-10 w-20 rounded bg-[#ffe0e8]" />
+                <div className="mt-4 h-3 w-32 rounded bg-[#ffe0e8]" />
+              </div>
+            );
+          }
+
+          const Icon = item.icon;
+          return (
+            <article
+              key={item.title}
+              className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)] transition hover:-translate-y-1 hover:shadow-[0_25px_55px_rgba(255,122,149,0.18)]"
+            >
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
-                    <ShieldCheck className="h-4 w-4 text-emerald-300" />
-                    Logged in as {user?.name || "Superadmin"}
-                  </div>
-
-                  <h2 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                    Oversee approvals, organizations, and platform health
-                  </h2>
-
-                  <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                    Use this dashboard to review registrations, monitor live
-                    activity, and keep the BloodBridge healthcare network secure
-                    and organized.
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#7c4a5e]">
+                    {item.title}
                   </p>
+                  <h3 className="mt-3 text-4xl font-semibold text-[#31101e]">
+                    {formatNumber(item.value)}
+                  </h3>
+                  <p className="mt-2 text-xs text-[#a44255]">{item.note}</p>
                 </div>
 
-                <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <p className="text-sm text-gray-400">Access level</p>
-                  <p className="mt-2 text-2xl font-black text-white">
-                    Superadmin
-                  </p>
-                  <p className="mt-1 text-sm text-gray-400">
-                    {user?.email || "admin@platform.com"}
-                  </p>
-                  <button
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-                    {refreshing ? 'Refreshing...' : 'Refresh Dashboard'}
-                  </button>
+                <div
+                  className={`rounded-2xl bg-gradient-to-br ${item.accent} p-4`}
+                >
+                  <Icon className="h-6 w-6 text-white" />
                 </div>
               </div>
-            </section>
+            </article>
+          );
+        })}
+      </div>
 
-            {error && (
-              <div className="rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-                {error}
+      {/* Middle */}
+      <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+                Approval queue
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                Pending Organizations
+              </h3>
+            </div>
+
+            <button
+              onClick={() => navigate("/superadmin/dashboard/approvals")}
+              className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white"
+            >
+              View all
+              <ArrowUpRight className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                >
+                  <div className="h-4 w-48 rounded bg-[#ffe0e8]" />
+                  <div className="mt-3 h-3 w-32 rounded bg-[#ffe0e8]" />
+                  <div className="mt-5 h-10 w-28 rounded bg-[#ffe0e8]" />
+                </div>
+              ))
+            ) : pendingOrganizations.length > 0 ? (
+              pendingOrganizations.map((org) => (
+                <div
+                  key={org._id || org.id || org.organizationCode || org.name}
+                  className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5 transition hover:border-[#ff4d6d] hover:shadow-md"
+                >
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-lg font-semibold text-[#31101e]">
+                          {org.organizationName || org.name || "Organization"}
+                        </h4>
+                        <span className="rounded-full border border-amber-300 bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                          {org.status || "Pending"}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm text-[#7c4a5e]">
+                        {org.organizationType || org.type || "Organization"} •{" "}
+                        {org.city || org.location?.city || "Unknown location"}
+                      </p>
+                      <p className="mt-1 text-xs text-[#a44255] font-mono">
+                        {org.organizationCode || org.code || org._id}
+                      </p>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() =>
+                          navigate("/superadmin/organization-details")
+                        }
+                        className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                      >
+                        Review
+                      </button>
+                      <button
+                        onClick={() => navigate("/superadmin/organizations")}
+                        className="rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white"
+                      >
+                        Details
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-8 text-center text-[#7c4a5e]">
+                <Clock3 className="mx-auto h-10 w-10 text-[#a44255]" />
+                <p className="mt-4">No pending approvals right now.</p>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Stats */}
-            <section className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-              {(loading ? Array.from({ length: 4 }) : stats).map(
-                (item, idx) => {
-                  if (loading) {
-                    return (
-                      <div
-                        key={idx}
-                        className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl animate-pulse"
-                      >
-                        <div className="h-4 w-24 rounded bg-white/10" />
-                        <div className="mt-5 h-10 w-20 rounded bg-white/10" />
-                        <div className="mt-4 h-3 w-32 rounded bg-white/10" />
-                      </div>
-                    );
-                  }
+        <div className="space-y-6">
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#9b1e27]">
+                  Recent organizations
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Latest registrations
+                </h3>
+              </div>
+              <button
+                onClick={() => navigate("/superadmin/organizations")}
+                className="text-sm font-semibold text-[#ff4d6d] hover:text-[#9b1e27]"
+              >
+                View all
+              </button>
+            </div>
 
-                  const Icon = item.icon;
-                  return (
+            <div className="mt-6 space-y-3">
+              {loading
+                ? Array.from({ length: 3 }).map((_, i) => (
                     <div
-                      key={item.title}
-                      className="rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/20"
+                      key={i}
+                      className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-sm text-gray-400">{item.title}</p>
-                          <h3 className="mt-3 text-4xl font-black text-white">
-                            {formatNumber(item.value)}
-                          </h3>
-                          <p className="mt-2 text-xs text-gray-500">
-                            {item.note}
-                          </p>
-                        </div>
-
-                        <div
-                          className={`rounded-2xl bg-gradient-to-br ${item.accent} p-4`}
-                        >
-                          <Icon className="h-6 w-6 text-white" />
-                        </div>
-                      </div>
+                      <div className="h-4 w-32 rounded bg-[#ffe0e8]" />
+                      <div className="mt-2 h-3 w-24 rounded bg-[#ffe0e8]" />
                     </div>
-                  );
-                },
-              )}
-            </section>
-
-            {/* Middle */}
-            <section className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-red-400">
-                      Approval queue
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Pending Organizations
-                    </h3>
-                  </div>
-
-                  <button
-                    onClick={() => navigate("/superadmin/dashboard/approvals")}
-                    className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    View all
-                    <ArrowUpRight className="h-4 w-4" />
-                  </button>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {loading ? (
-                    Array.from({ length: 3 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-5"
-                      >
-                        <div className="h-4 w-48 rounded bg-white/10" />
-                        <div className="mt-3 h-3 w-32 rounded bg-white/10" />
-                        <div className="mt-5 h-10 w-28 rounded bg-white/10" />
-                      </div>
-                    ))
-                  ) : pendingOrganizations.length > 0 ? (
-                    pendingOrganizations.map((org) => (
-                      <div
-                        key={
-                          org._id || org.id || org.organizationCode || org.name
-                        }
-                        className="rounded-2xl border border-white/10 bg-slate-950/40 p-5 transition hover:border-white/20"
-                      >
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-lg font-bold text-white">
-                                {org.organizationName ||
-                                  org.name ||
-                                  "Organization"}
-                              </h4>
-                              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-300">
-                                {org.status || "Pending"}
-                              </span>
-                            </div>
-
-                            <p className="mt-1 text-sm text-gray-400">
-                              {org.organizationType ||
-                                org.type ||
-                                "Organization"}{" "}
-                              •{" "}
-                              {org.city ||
-                                org.location?.city ||
-                                "Unknown location"}
-                            </p>
-                            <p className="mt-1 text-xs text-gray-500 font-mono">
-                              {org.organizationCode || org.code || org._id}
-                            </p>
-                          </div>
-
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() =>
-                                navigate("/superadmin/organization-details")
-                              }
-                              className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-semibold text-white"
-                            >
-                              Review
-                            </button>
-                            <button
-                              onClick={() =>
-                                navigate("/superadmin/organizations")
-                              }
-                              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white"
-                            >
-                              Details
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-8 text-center text-gray-400">
-                      <Clock3 className="mx-auto h-10 w-10 text-gray-500" />
-                      <p className="mt-4">No pending approvals right now.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-violet-400">
-                        Recent organizations
-                      </p>
-                      <h3 className="mt-2 text-2xl font-black text-white">
-                        Latest registrations
-                      </h3>
-                    </div>
-                    <button
-                      onClick={() => navigate("/superadmin/organizations")}
-                      className="text-sm text-gray-300 hover:text-white"
+                  ))
+                : (organizations.length > 0
+                    ? organizations.slice(0, 3)
+                    : [
+                        {
+                          name: "City Blood Bank",
+                          type: "Blood Bank",
+                          city: "Mumbai",
+                        },
+                        {
+                          name: "General Hospital",
+                          type: "Hospital",
+                          city: "Delhi",
+                        },
+                        {
+                          name: "Healthcare NGO",
+                          type: "NGO",
+                          city: "Bangalore",
+                        },
+                      ]
+                  ).map((org, idx) => (
+                    <div
+                      key={org._id || org.id || idx}
+                      className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
                     >
-                      View all
-                    </button>
-                  </div>
-
-                  <div className="mt-6 space-y-3">
-                    {loading
-                      ? Array.from({ length: 3 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                          >
-                            <div className="h-4 w-32 rounded bg-white/10" />
-                            <div className="mt-2 h-3 w-24 rounded bg-white/10" />
-                          </div>
-                        ))
-                      : (organizations.length > 0
-                          ? organizations.slice(0, 3)
-                          : [
-                              {
-                                name: "City Blood Bank",
-                                type: "Blood Bank",
-                                city: "Mumbai",
-                              },
-                              {
-                                name: "General Hospital",
-                                type: "Hospital",
-                                city: "Delhi",
-                              },
-                              {
-                                name: "Healthcare NGO",
-                                type: "NGO",
-                                city: "Bangalore",
-                              },
-                            ]
-                        ).map((org, idx) => (
-                          <div
-                            key={org._id || org.id || idx}
-                            className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                          >
-                            <p className="font-semibold text-white">
-                              {org.organizationName || org.name || "Organization"}
-                            </p>
-                            <p className="mt-1 text-sm text-gray-400">
-                              {org.organizationType || org.type || "Organization"} • {org.city || org.location?.city || "Unknown"}
-                            </p>
-                          </div>
-                        ))}
-                  </div>
-                </div>
-
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                        System health
+                      <p className="font-semibold text-[#31101e]">
+                        {org.organizationName || org.name || "Organization"}
                       </p>
-                      <h3 className="mt-2 text-2xl font-black text-white">
-                        Live status
-                      </h3>
-                    </div>
-                    <div className="rounded-2xl bg-emerald-500/10 p-3">
-                      <ShieldCheck className="h-6 w-6 text-emerald-300" />
-                    </div>
-                  </div>
-
-                  <div className="mt-6 space-y-3">
-                    {loading
-                      ? Array.from({ length: 4 }).map((_, i) => (
-                          <div
-                            key={i}
-                            className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                          >
-                            <div className="h-4 w-24 rounded bg-white/10" />
-                            <div className="mt-2 h-3 w-32 rounded bg-white/10" />
-                          </div>
-                        ))
-                      : (systemHealth.length > 0
-                          ? systemHealth
-                          : [
-                              {
-                                name: "Database",
-                                status: "Healthy",
-                                details: "MongoDB connected",
-                              },
-                              {
-                                name: "API Services",
-                                status: "Running",
-                                details: "All routes active",
-                              },
-                              {
-                                name: "Cache Layer",
-                                status: "Active",
-                                details: "Redis available",
-                              },
-                              {
-                                name: "Alerts",
-                                status: "Monitoring",
-                                details: "No critical issues",
-                              },
-                            ]
-                        ).map((item, idx) => {
-                          const status = String(
-                            item.status || item.state || "unknown",
-                          ).toLowerCase();
-                          const ok = [
-                            "healthy",
-                            "running",
-                            "active",
-                            "ok",
-                            "normal",
-                            "good",
-                          ].includes(status);
-                          const warn = [
-                            "monitoring",
-                            "warning",
-                            "degraded",
-                            "pending",
-                          ].includes(status);
-
-                          return (
-                            <div
-                              key={item.name || idx}
-                              className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                            >
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <p className="font-semibold text-white">
-                                    {item.name || item.service || "Service"}
-                                  </p>
-                                  <p className="mt-1 text-sm text-gray-400">
-                                    {item.details ||
-                                      item.message ||
-                                      "No details provided"}
-                                  </p>
-                                </div>
-
-                                <span
-                                  className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
-                                    ok
-                                      ? "bg-emerald-500/10 text-emerald-300"
-                                      : warn
-                                        ? "bg-amber-500/10 text-amber-300"
-                                        : "bg-rose-500/10 text-rose-300"
-                                  }`}
-                                >
-                                  {ok ? (
-                                    <CheckCircle2 className="h-3.5 w-3.5" />
-                                  ) : warn ? (
-                                    <AlertTriangle className="h-3.5 w-3.5" />
-                                  ) : (
-                                    <XCircle className="h-3.5 w-3.5" />
-                                  )}
-                                  {item.status || item.state || "Unknown"}
-                                </span>
-                              </div>
-                            </div>
-                          );
-                        })}
-                  </div>
-                </div>
-
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <p className="text-sm uppercase tracking-[0.25em] text-rose-400">
-                    Alert summary
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    Today’s activity
-                  </h3>
-
-                  <div className="mt-5 grid grid-cols-2 gap-4">
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                      <p className="text-xs text-gray-400">Approved today</p>
-                      <p className="mt-2 text-3xl font-black text-emerald-300">
-                        {formatNumber(overview.approvedToday || 0)}
+                      <p className="mt-1 text-sm text-[#7c4a5e]">
+                        {org.organizationType || org.type || "Organization"} •{" "}
+                        {org.city || org.location?.city || "Unknown"}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                      <p className="text-xs text-gray-400">Rejected today</p>
-                      <p className="mt-2 text-3xl font-black text-rose-300">
-                        {formatNumber(overview.rejectedToday || 0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                  ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                  System health
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Live status
+                </h3>
               </div>
-            </section>
-
-            {/* Bottom */}
-            <section className="grid gap-6 lg:grid-cols-2">
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-violet-400">
-                      Recent activity
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Live feed
-                    </h3>
-                  </div>
-                  <button
-                    onClick={() => navigate("/superadmin/activity")}
-                    className="text-sm text-gray-300 hover:text-white"
-                  >
-                    View all
-                  </button>
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {loading
-                    ? Array.from({ length: 4 }).map((_, i) => (
-                        <div
-                          key={i}
-                          className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="h-4 w-52 rounded bg-white/10" />
-                          <div className="mt-2 h-3 w-28 rounded bg-white/10" />
-                        </div>
-                      ))
-                    : (recentActivity.length > 0
-                        ? recentActivity
-                        : [
-                            {
-                              title: "Apollo Healthcare Center registered",
-                              time: "5 mins ago",
-                            },
-                            {
-                              title: "LifeCare Blood Bank submitted update",
-                              time: "18 mins ago",
-                            },
-                            {
-                              title: "New donation camp created",
-                              time: "1 hour ago",
-                            },
-                            {
-                              title: "Approval queue refreshed",
-                              time: "2 hours ago",
-                            },
-                          ]
-                      ).map((item, idx) => (
-                        <div
-                          key={item._id || idx}
-                          className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <p className="font-semibold text-white">
-                            {item.title ||
-                              item.action ||
-                              item.message ||
-                              "Activity"}
-                          </p>
-                          <p className="mt-1 text-sm text-gray-400">
-                            {item.time ||
-                              item.createdAt ||
-                              item.timestamp ||
-                              "Just now"}
-                          </p>
-                        </div>
-                      ))}
-                </div>
+              <div className="rounded-2xl bg-emerald-100 p-3">
+                <ShieldCheck className="h-6 w-6 text-emerald-600" />
               </div>
+            </div>
 
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                      Quick actions
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Admin tasks
-                    </h3>
-                  </div>
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
+            <div className="mt-6 space-y-3">
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="h-4 w-24 rounded bg-[#ffe0e8]" />
+                      <div className="mt-2 h-3 w-32 rounded bg-[#ffe0e8]" />
+                    </div>
+                  ))
+                : (systemHealth.length > 0
+                    ? systemHealth
+                    : [
+                        {
+                          name: "Database",
+                          status: "Healthy",
+                          details: "MongoDB connected",
+                        },
+                        {
+                          name: "API Services",
+                          status: "Running",
+                          details: "All routes active",
+                        },
+                        {
+                          name: "Cache Layer",
+                          status: "Active",
+                          details: "Redis available",
+                        },
+                        {
+                          name: "Alerts",
+                          status: "Monitoring",
+                          details: "No critical issues",
+                        },
+                      ]
+                  ).map((item, idx) => {
+                    const status = String(
+                      item.status || item.state || "unknown",
+                    ).toLowerCase();
+                    const ok = [
+                      "healthy",
+                      "running",
+                      "active",
+                      "ok",
+                      "normal",
+                      "good",
+                    ].includes(status);
+                    const warn = [
+                      "monitoring",
+                      "warning",
+                      "degraded",
+                      "pending",
+                    ].includes(status);
 
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {quickActions.map((action) => {
-                    const Icon = action.icon;
                     return (
-                      <button
-                        key={action.label}
-                        onClick={() => navigate(action.path)}
-                        className="group rounded-[26px] border border-white/10 bg-slate-950/40 p-5 text-left transition hover:-translate-y-1 hover:border-white/20"
+                      <div
+                        key={item.name || idx}
+                        className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
                       >
-                        <div
-                          className={`inline-flex rounded-2xl bg-gradient-to-r ${action.accent} p-3`}
-                        >
-                          <Icon className="h-5 w-5 text-white" />
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[#31101e]">
+                              {item.name || item.service || "Service"}
+                            </p>
+                            <p className="mt-1 text-sm text-[#7c4a5e]">
+                              {item.details ||
+                                item.message ||
+                                "No details provided"}
+                            </p>
+                          </div>
+
+                          <span
+                            className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${
+                              ok
+                                ? "bg-emerald-100 text-emerald-700"
+                                : warn
+                                  ? "bg-amber-100 text-amber-700"
+                                  : "bg-red-100 text-red-700"
+                            }`}
+                          >
+                            {ok ? (
+                              <CheckCircle2 className="h-3.5 w-3.5" />
+                            ) : warn ? (
+                              <AlertTriangle className="h-3.5 w-3.5" />
+                            ) : (
+                              <XCircle className="h-3.5 w-3.5" />
+                            )}
+                            {item.status || item.state || "Unknown"}
+                          </span>
                         </div>
-                        <h4 className="mt-4 text-lg font-bold text-white">
-                          {action.label}
-                        </h4>
-                        <p className="mt-2 text-sm text-gray-400 leading-relaxed">
-                          {action.description}
-                        </p>
-                        <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gray-300 group-hover:text-white">
-                          Open
-                          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </div>
-                      </button>
+                      </div>
                     );
                   })}
-                </div>
-              </div>
-            </section>
+            </div>
+          </div>
 
-            {/* Mobile Logout */}
-            <div className="xl:hidden">
-              <button
-                onClick={handleLogout}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
-              >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </button>
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+              Alert summary
+            </p>
+            <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+              Today's activity
+            </h3>
+
+            <div className="mt-5 grid grid-cols-2 gap-4">
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+                <p className="text-xs text-[#7c4a5e]">Approved today</p>
+                <p className="mt-2 text-3xl font-semibold text-emerald-600">
+                  {formatNumber(overview.approvedToday || 0)}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+                <p className="text-xs text-[#7c4a5e]">Rejected today</p>
+                <p className="mt-2 text-3xl font-semibold text-red-600">
+                  {formatNumber(overview.rejectedToday || 0)}
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Bottom */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#9b1e27]">
+                Recent activity
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                Live feed
+              </h3>
+            </div>
+            <button
+              onClick={() => navigate("/superadmin/dashboard/activity")}
+              className="text-sm font-semibold text-[#ff4d6d] hover:text-[#9b1e27]"
+            >
+              View all
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-4">
+            {loading
+              ? Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-4 w-52 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-3 w-28 rounded bg-[#ffe0e8]" />
+                  </div>
+                ))
+              : (recentActivity.length > 0
+                  ? recentActivity
+                  : [
+                      {
+                        title: "Apollo Healthcare Center registered",
+                        time: "5 mins ago",
+                      },
+                      {
+                        title: "LifeCare Blood Bank submitted update",
+                        time: "18 mins ago",
+                      },
+                      {
+                        title: "New donation camp created",
+                        time: "1 hour ago",
+                      },
+                      {
+                        title: "Approval queue refreshed",
+                        time: "2 hours ago",
+                      },
+                    ]
+                ).map((item, idx) => (
+                  <div
+                    key={item._id || idx}
+                    className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <p className="font-semibold text-[#31101e]">
+                      {item.title || item.action || item.message || "Activity"}
+                    </p>
+                    <p className="mt-1 text-sm text-[#7c4a5e]">
+                      {item.time ||
+                        item.createdAt ||
+                        item.timestamp ||
+                        "Just now"}
+                    </p>
+                  </div>
+                ))}
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                Quick actions
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                Admin tasks
+              </h3>
+            </div>
+            <Search className="h-5 w-5 text-[#7c4a5e]" />
+          </div>
+
+          <div className="mt-6 grid gap-4 sm:grid-cols-2">
+            {quickActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <button
+                  key={action.label}
+                  onClick={() => navigate(action.path)}
+                  className="group rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5 text-left transition hover:-translate-y-1 hover:border-[#ff4d6d] hover:shadow-md"
+                >
+                  <div
+                    className={`inline-flex rounded-2xl bg-gradient-to-r ${action.accent} p-3`}
+                  >
+                    <Icon className="h-5 w-5 text-white" />
+                  </div>
+                  <h4 className="mt-4 text-lg font-semibold text-[#31101e]">
+                    {action.label}
+                  </h4>
+                  <p className="mt-2 text-sm text-[#7c4a5e] leading-relaxed">
+                    {action.description}
+                  </p>
+                  <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#ff4d6d] group-hover:text-[#9b1e27]">
+                    Open
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Logout */}
+      <div className="xl:hidden">
+        <button
+          onClick={handleLogout}
+          className="w-full inline-flex items-center justify-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] transition hover:bg-white"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
+      </div>
+    </section>
   );
 }

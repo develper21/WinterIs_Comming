@@ -61,15 +61,15 @@ const normalizeStatus = (value) => String(value || "").toUpperCase();
 const getStatusStyle = (status) => {
   switch (normalizeStatus(status)) {
     case "APPROVED":
-      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
+      return "bg-emerald-100 border-emerald-300 text-emerald-700";
     case "PENDING":
-      return "bg-amber-500/10 border-amber-500/20 text-amber-300";
+      return "bg-amber-100 border-amber-300 text-amber-700";
     case "REJECTED":
-      return "bg-rose-500/10 border-rose-500/20 text-rose-300";
+      return "bg-red-100 border-red-300 text-red-700";
     case "SUSPENDED":
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
     default:
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
   }
 };
 
@@ -293,522 +293,478 @@ export default function OrganizationDetails() {
         : profileType || "Organization";
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-rose-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Organization Details
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            {loading
+              ? "Loading organization..."
+              : organization?.organizationName ||
+                organization?.name ||
+                "Organization Details"}
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Inspect the full organization profile, contact information, license
+            details, admin account, and status history
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => navigate("/superadmin/organizations")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={() => navigate("/superadmin/dashboard/overview")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 min-h-screen">
-        {/* Header */}
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <button
-                onClick={() => navigate("/superadmin/organizations")}
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Organizations
-              </button>
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                  />
-                  Refresh
-                </button>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Status"
+          value={getStatusLabel(status)}
+          accent="text-[#1e5aa8]"
+        />
+        <StatCard label="Type" value={displayType} accent="text-[#2c8a49]" />
+        <StatCard
+          label="Code"
+          value={
+            organization?.organizationCode ||
+            organization?._id ||
+            organization?.id ||
+            "-"
+          }
+          accent="text-[#d1661c]"
+          mono
+        />
+        <StatCard
+          label="Submitted"
+          value={formatDate(
+            organization?.createdAt || organization?.submittedAt,
+          )}
+          accent="text-[#d93f42]"
+        />
+      </div>
 
-                <button
-                  onClick={() => navigate("/superadmin/dashboard")}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
+      {loading ? (
+        <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div className="space-y-6">
+            <SkeletonCard height="h-72" />
+            <SkeletonCard height="h-64" />
+            <SkeletonCard height="h-80" />
           </div>
-        </header>
-
-        <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
-          {/* Hero */}
-          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-            <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl" />
-
-            <div className="relative z-10 grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
-                  <Sparkles className="h-4 w-4 text-cyan-300" />
-                  Organization details and action center
+          <div className="space-y-6">
+            <SkeletonCard height="h-80" />
+            <SkeletonCard height="h-72" />
+          </div>
+        </div>
+      ) : organization ? (
+        <>
+          {/* Top grid */}
+          <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            {/* Profile */}
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                    Profile
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                    Organization Profile
+                  </h2>
                 </div>
 
-                <h1 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                  {loading
-                    ? "Loading organization..."
-                    : organization?.organizationName ||
-                      organization?.name ||
-                      "Organization Details"}
-                </h1>
-
-                <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                  Inspect the full organization profile, contact information,
-                  license details, admin account, and status history from one
-                  secure page.
-                </p>
+                <div
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(status)}`}
+                >
+                  {getStatusLabel(status)}
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <StatCard
-                  label="Status"
-                  value={getStatusLabel(status)}
-                  accent="text-cyan-300"
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <DetailRow
+                  icon={Building2}
+                  label="Organization Name"
+                  value={organization?.organizationName || organization?.name}
                 />
-                <StatCard
-                  label="Type"
+                <DetailRow
+                  icon={BadgeCheck}
+                  label="Organization Type"
                   value={displayType}
-                  accent="text-emerald-300"
                 />
-                <StatCard
-                  label="Code"
+                <DetailRow
+                  icon={Hash}
+                  label="Organization Code"
                   value={
                     organization?.organizationCode ||
                     organization?._id ||
-                    organization?.id ||
-                    "-"
+                    organization?.id
                   }
-                  accent="text-amber-300"
                   mono
                 />
-                <StatCard
-                  label="Submitted"
+                <DetailRow
+                  icon={CalendarDays}
+                  label="Registration Date"
                   value={formatDate(
                     organization?.createdAt || organization?.submittedAt,
                   )}
-                  accent="text-rose-300"
+                />
+                <DetailRow
+                  icon={Clock3}
+                  label="Status"
+                  value={getStatusLabel(status)}
+                />
+                <DetailRow
+                  icon={FileText}
+                  label="License Number"
+                  value={organization?.licenseNumber || "-"}
+                />
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                  Notes
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                  {organization?.description ||
+                    organization?.notes ||
+                    "This section contains the core organization identity and registration information used by the superadmin team for verification and lifecycle management."}
+                </p>
+              </div>
+            </div>
+
+            {/* Action center */}
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#d1661c]">
+                    Action center
+                  </p>
+                  <h2 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                    Administrative actions
+                  </h2>
+                </div>
+
+                <ShieldCheck className="h-6 w-6 text-[#2c8a49]" />
+              </div>
+
+              <div className="mt-6 space-y-4">
+                {status === "PENDING" && (
+                  <>
+                    <ActionButton
+                      title="Approve organization"
+                      description="Move this organization into the approved state."
+                      icon={CheckCircle2}
+                      accent="from-[#2c8a49] to-[#5ec271]"
+                      onClick={() => setShowApproveModal(true)}
+                    />
+                    <ActionButton
+                      title="Reject organization"
+                      description="Reject the application with a reason."
+                      icon={XCircle}
+                      accent="from-[#d93f42] to-[#f08a8d]"
+                      onClick={() => setShowRejectModal(true)}
+                    />
+                  </>
+                )}
+
+                {status === "APPROVED" && (
+                  <>
+                    <ActionButton
+                      title="Suspend organization"
+                      description="Temporarily disable access for this organization."
+                      icon={Ban}
+                      accent="from-[#d1661c] to-[#f2994a]"
+                      onClick={() => setShowSuspendModal(true)}
+                    />
+                    <ActionButton
+                      title="View approval history"
+                      description="Inspect how the organization reached approved state."
+                      icon={Eye}
+                      accent="from-[#1e5aa8] to-[#6fb1ff]"
+                      onClick={() => toast("Use the status history below")}
+                    />
+                  </>
+                )}
+
+                {status === "SUSPENDED" && (
+                  <>
+                    <ActionButton
+                      title="Reactivate organization"
+                      description="Restore platform access for this organization."
+                      icon={RefreshCw}
+                      accent="from-[#2c8a49] to-[#5ec271]"
+                      onClick={() => setShowReactivateModal(true)}
+                    />
+                    <ActionButton
+                      title="Review history"
+                      description="Check the full organization timeline."
+                      icon={Eye}
+                      accent="from-[#1e5aa8] to-[#6fb1ff]"
+                      onClick={() => toast("Use the status history below")}
+                    />
+                  </>
+                )}
+
+                {status === "REJECTED" && (
+                  <>
+                    <ActionButton
+                      title="Reactivate organization"
+                      description="Restore the record and return it to active review."
+                      icon={RefreshCw}
+                      accent="from-[#2c8a49] to-[#5ec271]"
+                      onClick={() => setShowReactivateModal(true)}
+                    />
+                    <ActionButton
+                      title="Re-review rejection"
+                      description="Re-open the application if needed."
+                      icon={ShieldAlert}
+                      accent="from-[#d1661c] to-[#f2994a]"
+                      onClick={() => setShowApproveModal(true)}
+                    />
+                  </>
+                )}
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 rounded-xl bg-[#ffe0e8] p-2">
+                    <AlertTriangle className="h-4 w-4 text-[#7c4a5e]" />
+                  </div>
+                  <p className="text-sm leading-relaxed text-[#7c4a5e]">
+                    Approve, reject, suspend, and reactivate actions are
+                    protected through confirmation dialogs to prevent accidental
+                    changes.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Contact + Admin */}
+          <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+            {/* Contact */}
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                  Contact information
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Organization contact details
+                </h2>
+              </div>
+
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <DetailRow
+                  icon={Mail}
+                  label="Organization Email"
+                  value={organization?.email || "-"}
+                />
+                <DetailRow
+                  icon={Phone}
+                  label="Phone Number"
+                  value={
+                    organization?.phone || organization?.contactNumber || "-"
+                  }
+                />
+                <DetailRow
+                  icon={MapPin}
+                  label="City"
+                  value={
+                    organization?.city || organization?.location?.city || "-"
+                  }
+                />
+                <DetailRow
+                  icon={MapPin}
+                  label="State"
+                  value={
+                    organization?.state || organization?.location?.state || "-"
+                  }
+                />
+                <DetailRow
+                  icon={MapPin}
+                  label="Address"
+                  value={
+                    organization?.address ||
+                    organization?.location?.address ||
+                    "-"
+                  }
+                />
+                <DetailRow
+                  icon={Hash}
+                  label="Pincode"
+                  value={
+                    organization?.pincode ||
+                    organization?.location?.pincode ||
+                    "-"
+                  }
                 />
               </div>
             </div>
-          </section>
 
-          {error && (
-            <div className="rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-              <div className="space-y-6">
-                <SkeletonCard height="h-72" />
-                <SkeletonCard height="h-64" />
-                <SkeletonCard height="h-80" />
+            {/* Admin */}
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#9b1e27]">
+                  Admin user
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Admin account information
+                </h2>
               </div>
-              <div className="space-y-6">
-                <SkeletonCard height="h-80" />
-                <SkeletonCard height="h-72" />
-              </div>
-            </div>
-          ) : organization ? (
-            <>
-              {/* Top grid */}
-              <section className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-                {/* Profile */}
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                        Profile
-                      </p>
-                      <h2 className="mt-2 text-2xl font-black text-white">
-                        Organization Profile
-                      </h2>
-                    </div>
 
-                    <div
-                      className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(status)}`}
-                    >
-                      {getStatusLabel(status)}
-                    </div>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 md:grid-cols-2">
-                    <DetailRow
-                      icon={Building2}
-                      label="Organization Name"
-                      value={
-                        organization?.organizationName || organization?.name
-                      }
-                    />
-                    <DetailRow
-                      icon={BadgeCheck}
-                      label="Organization Type"
-                      value={displayType}
-                    />
-                    <DetailRow
-                      icon={Hash}
-                      label="Organization Code"
-                      value={
-                        organization?.organizationCode ||
-                        organization?._id ||
-                        organization?.id
-                      }
-                      mono
-                    />
-                    <DetailRow
-                      icon={CalendarDays}
-                      label="Registration Date"
-                      value={formatDate(
-                        organization?.createdAt || organization?.submittedAt,
-                      )}
-                    />
-                    <DetailRow
-                      icon={Clock3}
-                      label="Status"
-                      value={getStatusLabel(status)}
-                    />
-                    <DetailRow
-                      icon={FileText}
-                      label="License Number"
-                      value={organization?.licenseNumber || "-"}
-                    />
-                  </div>
-
-                  <div className="mt-6 rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                    <p className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                      Notes
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                      {organization?.description ||
-                        organization?.notes ||
-                        "This section contains the core organization identity and registration information used by the superadmin team for verification and lifecycle management."}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action center */}
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-amber-400">
-                        Action center
-                      </p>
-                      <h2 className="mt-2 text-2xl font-black text-white">
-                        Administrative actions
-                      </h2>
-                    </div>
-
-                    <ShieldCheck className="h-6 w-6 text-emerald-300" />
-                  </div>
-
-                  <div className="mt-6 space-y-4">
-                    {status === "PENDING" && (
-                      <>
-                        <ActionButton
-                          title="Approve organization"
-                          description="Move this organization into the approved state."
-                          icon={CheckCircle2}
-                          accent="from-emerald-500 to-teal-500"
-                          onClick={() => setShowApproveModal(true)}
-                        />
-                        <ActionButton
-                          title="Reject organization"
-                          description="Reject the application with a reason."
-                          icon={XCircle}
-                          accent="from-rose-500 to-red-500"
-                          onClick={() => setShowRejectModal(true)}
-                        />
-                      </>
-                    )}
-
-                    {status === "APPROVED" && (
-                      <>
-                        <ActionButton
-                          title="Suspend organization"
-                          description="Temporarily disable access for this organization."
-                          icon={Ban}
-                          accent="from-amber-500 to-orange-500"
-                          onClick={() => setShowSuspendModal(true)}
-                        />
-                        <ActionButton
-                          title="View approval history"
-                          description="Inspect how the organization reached approved state."
-                          icon={Eye}
-                          accent="from-cyan-500 to-blue-500"
-                          onClick={() => toast("Use the status history below")}
-                        />
-                      </>
-                    )}
-
-                    {status === "SUSPENDED" && (
-                      <>
-                        <ActionButton
-                          title="Reactivate organization"
-                          description="Restore platform access for this organization."
-                          icon={RefreshCw}
-                          accent="from-emerald-500 to-teal-500"
-                          onClick={() => setShowReactivateModal(true)}
-                        />
-                        <ActionButton
-                          title="Review history"
-                          description="Check the full organization timeline."
-                          icon={Eye}
-                          accent="from-cyan-500 to-blue-500"
-                          onClick={() => toast("Use the status history below")}
-                        />
-                      </>
-                    )}
-
-                    {status === "REJECTED" && (
-                      <>
-                        <ActionButton
-                          title="Reactivate organization"
-                          description="Restore the record and return it to active review."
-                          icon={RefreshCw}
-                          accent="from-emerald-500 to-teal-500"
-                          onClick={() => setShowReactivateModal(true)}
-                        />
-                        <ActionButton
-                          title="Re-review rejection"
-                          description="Re-open the application if needed."
-                          icon={ShieldAlert}
-                          accent="from-amber-500 to-orange-500"
-                          onClick={() => setShowApproveModal(true)}
-                        />
-                      </>
-                    )}
-                  </div>
-
-                  <div className="mt-6 rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1 rounded-xl bg-white/10 p-2">
-                        <AlertTriangle className="h-4 w-4 text-gray-300" />
-                      </div>
-                      <p className="text-sm leading-relaxed text-gray-300">
-                        Approve, reject, suspend, and reactivate actions are
-                        protected through confirmation dialogs to prevent
-                        accidental changes.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Contact + Admin */}
-              <section className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-                {/* Contact */}
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                      Contact information
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black text-white">
-                      Organization contact details
-                    </h2>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 md:grid-cols-2">
-                    <DetailRow
-                      icon={Mail}
-                      label="Organization Email"
-                      value={organization?.email || "-"}
-                    />
-                    <DetailRow
-                      icon={Phone}
-                      label="Phone Number"
-                      value={
-                        organization?.phone ||
-                        organization?.contactNumber ||
-                        "-"
-                      }
-                    />
-                    <DetailRow
-                      icon={MapPin}
-                      label="City"
-                      value={
-                        organization?.city ||
-                        organization?.location?.city ||
-                        "-"
-                      }
-                    />
-                    <DetailRow
-                      icon={MapPin}
-                      label="State"
-                      value={
-                        organization?.state ||
-                        organization?.location?.state ||
-                        "-"
-                      }
-                    />
-                    <DetailRow
-                      icon={MapPin}
-                      label="Address"
-                      value={
-                        organization?.address ||
-                        organization?.location?.address ||
-                        "-"
-                      }
-                    />
-                    <DetailRow
-                      icon={Hash}
-                      label="Pincode"
-                      value={
-                        organization?.pincode ||
-                        organization?.location?.pincode ||
-                        "-"
-                      }
-                    />
-                  </div>
-                </div>
-
-                {/* Admin */}
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-violet-400">
-                      Admin user
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black text-white">
-                      Admin account information
-                    </h2>
-                  </div>
-
-                  <div className="mt-6 grid gap-4 md:grid-cols-2">
-                    <DetailRow
-                      icon={UserCog}
-                      label="Admin Name"
-                      value={adminUser?.name || organization?.adminName || "-"}
-                    />
-                    <DetailRow
-                      icon={Mail}
-                      label="Admin Email"
-                      value={
-                        adminUser?.email || organization?.adminEmail || "-"
-                      }
-                    />
-                    <DetailRow
-                      icon={BadgeCheck}
-                      label="Admin Role"
-                      value={
-                        adminUser?.role || organization?.adminRole || "ADMIN"
-                      }
-                    />
-                    <DetailRow
-                      icon={Clock3}
-                      label="Last Login"
-                      value={formatDateTime(
-                        adminUser?.lastLogin || organization?.lastLogin,
-                      )}
-                    />
-                  </div>
-
-                  <div className="mt-6 rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                    <p className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                      Account readiness
-                    </p>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                      The admin account is the operational account used after
-                      approval. Keep credentials secure and ensure email
-                      identity is correct before activation.
-                    </p>
-                  </div>
-                </div>
-              </section>
-
-              {/* Status history */}
-              <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-rose-400">
-                      Status history
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black text-white">
-                      Lifecycle timeline
-                    </h2>
-                  </div>
-                  <Clock3 className="h-6 w-6 text-gray-400" />
-                </div>
-
-                <div className="mt-6">
-                  {statusHistory.length > 0 ? (
-                    <div className="relative ml-4 space-y-5 border-l border-white/10 pl-8">
-                      {statusHistory.map((item, index) => {
-                        const itemStatus = normalizeStatus(
-                          item.status || item.state || item.action,
-                        );
-                        const active = index === statusHistory.length - 1;
-
-                        return (
-                          <div
-                            key={item._id || item.id || index}
-                            className="relative"
-                          >
-                            <div
-                              className={`absolute -left-[41px] top-1 h-4 w-4 rounded-full border-4 ${
-                                active
-                                  ? "border-emerald-300 bg-emerald-300"
-                                  : "border-white/20 bg-slate-700"
-                              }`}
-                            />
-                            <div className="rounded-[24px] border border-white/10 bg-slate-950/40 p-5">
-                              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                <div>
-                                  <p className="font-bold text-white">
-                                    {itemStatus || "UPDATED"}
-                                  </p>
-                                  <p className="mt-1 text-sm text-gray-400">
-                                    {item.message ||
-                                      item.reason ||
-                                      item.note ||
-                                      item.description ||
-                                      "Status update"}
-                                  </p>
-                                </div>
-                                <p className="text-xs text-gray-500">
-                                  {formatDateTime(
-                                    item.createdAt ||
-                                      item.timestamp ||
-                                      item.date,
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-8 text-center text-gray-400">
-                      No status history available.
-                    </div>
+              <div className="mt-6 grid gap-4 md:grid-cols-2">
+                <DetailRow
+                  icon={UserCog}
+                  label="Admin Name"
+                  value={adminUser?.name || organization?.adminName || "-"}
+                />
+                <DetailRow
+                  icon={Mail}
+                  label="Admin Email"
+                  value={adminUser?.email || organization?.adminEmail || "-"}
+                />
+                <DetailRow
+                  icon={BadgeCheck}
+                  label="Admin Role"
+                  value={adminUser?.role || organization?.adminRole || "ADMIN"}
+                />
+                <DetailRow
+                  icon={Clock3}
+                  label="Last Login"
+                  value={formatDateTime(
+                    adminUser?.lastLogin || organization?.lastLogin,
                   )}
-                </div>
-              </section>
-            </>
-          ) : (
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl">
-              <Building2 className="mx-auto h-12 w-12 text-gray-500" />
-              <h2 className="mt-4 text-2xl font-black text-white">
-                Organization not found
-              </h2>
-              <p className="mt-2 text-gray-400">
-                The requested organization could not be loaded.
-              </p>
-              <button
-                onClick={() => navigate("/superadmin/organizations")}
-                className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 font-semibold text-white transition hover:scale-[1.02]"
-              >
-                Back to Organizations
-              </button>
+                />
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                  Account readiness
+                </p>
+                <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                  The admin account is the operational account used after
+                  approval. Keep credentials secure and ensure email identity is
+                  correct before activation.
+                </p>
+              </div>
             </div>
-          )}
-        </main>
-      </div>
+          </div>
+
+          {/* Status history */}
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#d93f42]">
+                  Status history
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Lifecycle timeline
+                </h2>
+              </div>
+              <Clock3 className="h-6 w-6 text-[#7c4a5e]" />
+            </div>
+
+            <div className="mt-6">
+              {statusHistory.length > 0 ? (
+                <div className="relative ml-4 space-y-5 border-l border-[#ffe0e8] pl-8">
+                  {statusHistory.map((item, index) => {
+                    const itemStatus = normalizeStatus(
+                      item.status || item.state || item.action,
+                    );
+                    const active = index === statusHistory.length - 1;
+
+                    return (
+                      <div
+                        key={item._id || item.id || index}
+                        className="relative"
+                      >
+                        <div
+                          className={`absolute -left-[41px] top-1 h-4 w-4 rounded-full border-4 ${
+                            active
+                              ? "border-[#2c8a49] bg-[#2c8a49]"
+                              : "border-[#ffe0e8] bg-[#a44255]"
+                          }`}
+                        />
+                        <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                              <p className="font-semibold text-[#31101e]">
+                                {itemStatus || "UPDATED"}
+                              </p>
+                              <p className="mt-1 text-sm text-[#7c4a5e]">
+                                {item.message ||
+                                  item.reason ||
+                                  item.note ||
+                                  item.description ||
+                                  "Status update"}
+                              </p>
+                            </div>
+                            <p className="text-xs text-[#a44255]">
+                              {formatDateTime(
+                                item.createdAt || item.timestamp || item.date,
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-8 text-center text-[#7c4a5e]">
+                  No status history available.
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-10 text-center shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <Building2 className="mx-auto h-12 w-12 text-[#a44255]" />
+          <h2 className="mt-4 text-2xl font-semibold text-[#31101e]">
+            Organization not found
+          </h2>
+          <p className="mt-2 text-[#7c4a5e]">
+            The requested organization could not be loaded.
+          </p>
+          <button
+            onClick={() => navigate("/superadmin/organizations")}
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#1e5aa8] to-[#6fb1ff] px-5 py-3 font-semibold text-white shadow-md transition hover:shadow-lg"
+          >
+            Back to Organizations
+          </button>
+        </div>
+      )}
 
       {/* Modals */}
       {showApproveModal && (
@@ -816,7 +772,7 @@ export default function OrganizationDetails() {
           title="Approve organization"
           description="Approve this organization and move it to the active state."
           confirmLabel={processing ? "Approving..." : "Approve"}
-          accent="from-emerald-500 to-teal-500"
+          accent="from-[#2c8a49] to-[#5ec271]"
           icon={CheckCircle2}
           loading={processing}
           onClose={() => {
@@ -834,7 +790,7 @@ export default function OrganizationDetails() {
           reason={rejectReason}
           setReason={setRejectReason}
           confirmLabel={processing ? "Rejecting..." : "Reject"}
-          accent="from-rose-500 to-red-500"
+          accent="from-[#d93f42] to-[#f08a8d]"
           icon={XCircle}
           loading={processing}
           onClose={() => {
@@ -853,7 +809,7 @@ export default function OrganizationDetails() {
           reason={suspendReason}
           setReason={setSuspendReason}
           confirmLabel={processing ? "Suspending..." : "Suspend"}
-          accent="from-amber-500 to-orange-500"
+          accent="from-[#d1661c] to-[#f2994a]"
           icon={Ban}
           loading={processing}
           onClose={() => {
@@ -870,7 +826,7 @@ export default function OrganizationDetails() {
           title="Reactivate organization"
           description="Restore access and move this organization back into an active state."
           confirmLabel={processing ? "Reactivating..." : "Reactivate"}
-          accent="from-cyan-500 to-blue-500"
+          accent="from-[#1e5aa8] to-[#6fb1ff]"
           icon={RefreshCw}
           loading={processing}
           onClose={() => {
@@ -880,23 +836,23 @@ export default function OrganizationDetails() {
           onConfirm={handleReactivate}
         />
       )}
-    </div>
+    </section>
   );
 }
 
 function DetailRow({ icon: Icon, label, value, mono = false }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 rounded-xl bg-white/10 p-2">
-          <Icon className="h-4 w-4 text-gray-300" />
+        <div className="mt-0.5 rounded-xl bg-[#ffe0e8] p-2">
+          <Icon className="h-4 w-4 text-[#7c4a5e]" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
             {label}
           </p>
           <p
-            className={`mt-1 break-words text-sm font-semibold ${mono ? "font-mono" : ""} text-white`}
+            className={`mt-1 break-words text-sm font-semibold ${mono ? "font-mono" : ""} text-[#31101e]`}
           >
             {value || "-"}
           </p>
@@ -906,12 +862,12 @@ function DetailRow({ icon: Icon, label, value, mono = false }) {
   );
 }
 
-function StatCard({ label, value, accent = "text-white", mono = false }) {
+function StatCard({ label, value, accent = "text-[#31101e]", mono = false }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs text-gray-400">{label}</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+      <p className="text-xs text-[#7c4a5e]">{label}</p>
       <p
-        className={`mt-2 break-words text-lg font-black ${accent} ${mono ? "font-mono" : ""}`}
+        className={`mt-2 break-words text-lg font-semibold ${accent} ${mono ? "font-mono" : ""}`}
       >
         {value}
       </p>
@@ -923,18 +879,18 @@ function ActionButton({ title, description, icon: Icon, accent, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="group w-full rounded-[26px] border border-white/10 bg-slate-950/40 p-5 text-left transition hover:-translate-y-1 hover:border-white/20"
+      className="group w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5 text-left transition hover:-translate-y-1 hover:border-[#ff4d6d] hover:shadow-md"
     >
       <div className="flex items-start gap-4">
         <div className={`rounded-2xl bg-gradient-to-r ${accent} p-3`}>
           <Icon className="h-5 w-5 text-white" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg font-bold text-white">{title}</h3>
-          <p className="mt-1 text-sm leading-relaxed text-gray-400">
+          <h3 className="text-lg font-semibold text-[#31101e]">{title}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-[#7c4a5e]">
             {description}
           </p>
-          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-gray-300 group-hover:text-white">
+          <div className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#ff4d6d] group-hover:text-[#9b1e27]">
             Open
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -947,15 +903,15 @@ function ActionButton({ title, description, icon: Icon, accent, onClick }) {
 function SkeletonCard({ height = "h-64" }) {
   return (
     <div
-      className={`animate-pulse rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl ${height}`}
+      className={`animate-pulse rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)] ${height}`}
     >
-      <div className="h-4 w-28 rounded bg-white/10" />
-      <div className="mt-4 h-8 w-56 rounded bg-white/10" />
-      <div className="mt-6 h-4 w-full rounded bg-white/10" />
-      <div className="mt-3 h-4 w-5/6 rounded bg-white/10" />
+      <div className="h-4 w-28 rounded bg-[#ffe0e8]" />
+      <div className="mt-4 h-8 w-56 rounded bg-[#ffe0e8]" />
+      <div className="mt-6 h-4 w-full rounded bg-[#ffe0e8]" />
+      <div className="mt-3 h-4 w-5/6 rounded bg-[#ffe0e8]" />
       <div className="mt-8 grid grid-cols-2 gap-4">
-        <div className="h-20 rounded-2xl bg-white/10" />
-        <div className="h-20 rounded-2xl bg-white/10" />
+        <div className="h-20 rounded-2xl bg-[#ffe0e8]" />
+        <div className="h-20 rounded-2xl bg-[#ffe0e8]" />
       </div>
     </div>
   );
@@ -972,8 +928,8 @@ function ConfirmModal({
   onConfirm,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
           <div
             className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}
@@ -981,14 +937,14 @@ function ConfirmModal({
             <Icon className="h-7 w-7 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -997,14 +953,14 @@ function ConfirmModal({
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60`}
+            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {confirmLabel}
           </button>
@@ -1027,8 +983,8 @@ function ReasonModal({
   onConfirm,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
           <div
             className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}
@@ -1036,21 +992,21 @@ function ReasonModal({
             <Icon className="h-7 w-7 text-white" />
           </div>
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="mt-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
             Reason
           </label>
           <textarea
@@ -1058,21 +1014,21 @@ function ReasonModal({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Enter a reason..."
-            className="w-full resize-none rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-white/20 focus:bg-white/10"
+            className="w-full resize-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
           />
         </div>
 
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60`}
+            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {confirmLabel}
           </button>

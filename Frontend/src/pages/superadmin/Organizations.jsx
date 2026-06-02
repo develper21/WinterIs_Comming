@@ -79,15 +79,15 @@ const getStatusStyle = (status) => {
   const s = String(status || "").toUpperCase();
   switch (s) {
     case "APPROVED":
-      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
+      return "bg-emerald-100 border-emerald-300 text-emerald-700";
     case "PENDING":
-      return "bg-amber-500/10 border-amber-500/20 text-amber-300";
+      return "bg-amber-100 border-amber-300 text-amber-700";
     case "REJECTED":
-      return "bg-rose-500/10 border-rose-500/20 text-rose-300";
+      return "bg-red-100 border-red-300 text-red-700";
     case "SUSPENDED":
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
     default:
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
   }
 };
 
@@ -328,553 +328,498 @@ export default function Organizations() {
   }, [organizations]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-amber-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-rose-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Organizations
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            Organizations Management
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Search, filter, review, suspend, and delete organizations
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={() => navigate("/superadmin/dashboard/overview")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 min-h-screen">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-cyan-400">
-                  Superadmin Organizations
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white">
-                  Organizations Management
-                </h1>
-              </div>
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                  />
-                  Refresh
-                </button>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatBox
+          label="Approved"
+          value={loading ? "..." : stats.approved}
+          color="text-[#2c8a49]"
+        />
+        <StatBox
+          label="Pending"
+          value={loading ? "..." : stats.pending}
+          color="text-[#d1661c]"
+        />
+        <StatBox
+          label="Rejected"
+          value={loading ? "..." : stats.rejected}
+          color="text-[#d93f42]"
+        />
+        <StatBox
+          label="Suspended"
+          value={loading ? "..." : stats.suspended}
+          color="text-[#7c4a5e]"
+        />
+      </div>
 
-                <button
-                  onClick={() => navigate("/superadmin/dashboard")}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
+      {/* Filters */}
+      <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search organization name, code, city, email..."
+              className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-5 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            />
+          </div>
+
+          <div className="relative">
+            <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-12 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <Building2 className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <select
+              value={typeFilter}
+              onChange={(e) => {
+                setTypeFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-12 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            >
+              {TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Current view
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {normalizeStatusLabel(statusFilter)} •{" "}
+              {TYPE_OPTIONS.find((o) => o.value === typeFilter)?.label ||
+                "All Types"}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Page
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {page} / {totalPages}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        {/* List */}
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                Organization directory
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                All organizations
+              </h3>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-[#ffe0e8] bg-[#fff7f9] px-4 py-2 text-sm text-[#7c4a5e]">
+              <Building2 className="h-4 w-4 text-[#1e5aa8]" />
+              {loading ? "Loading..." : `${totalItems} results`}
             </div>
           </div>
-        </header>
 
-        <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-          {/* Hero */}
-          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-            <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-rose-500/10 blur-3xl" />
-
-            <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-                  <Sparkles className="h-4 w-4" />
-                  All organizations in one control panel
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-3">
+                      <div className="h-4 w-56 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-44 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-32 rounded bg-[#ffe0e8]" />
+                    </div>
+                    <div className="h-10 w-28 rounded-2xl bg-[#ffe0e8]" />
+                  </div>
                 </div>
+              ))
+            ) : visibleOrganizations.length > 0 ? (
+              visibleOrganizations.map((org) => {
+                const id = org._id || org.id || org.organizationCode;
+                const isActive =
+                  selectedOrganization &&
+                  (selectedOrganization._id ||
+                    selectedOrganization.id ||
+                    selectedOrganization.organizationCode) === id;
 
-                <h2 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                  Search, filter, review, suspend, and delete organizations
-                </h2>
+                const typeLabel = normalizeTypeLabel(
+                  org.type || org.organizationType,
+                );
+                const statusLabel = normalizeStatusLabel(org.status);
 
-                <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                  Manage all registered hospitals, blood banks, and NGOs from a
-                  single secure interface with full status controls and detailed
-                  inspection.
+                return (
+                  <div
+                    key={id}
+                    className={`rounded-2xl border p-5 transition cursor-pointer ${
+                      isActive
+                        ? "border-[#ff4d6d] bg-[#fff0f3]"
+                        : "border-[#ffe0e8] bg-[#fff7f9] hover:border-[#ff4d6d] hover:shadow-md"
+                    }`}
+                    onClick={() => openDetails(org)}
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <h4 className="text-lg font-semibold text-[#31101e]">
+                            {org.organizationName || org.name || "Organization"}
+                          </h4>
+                          <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]">
+                            {typeLabel}
+                          </span>
+                          <span
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(org.status)}`}
+                          >
+                            {statusLabel}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#7c4a5e]">
+                          <span className="inline-flex items-center gap-2">
+                            <Hash className="h-4 w-4" />
+                            {org.organizationCode || id}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <MapPin className="h-4 w-4" />
+                            {org.city || org.location?.city || "Unknown city"}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            {org.email || org.adminEmail || "No email"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetails(org);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white"
+                        >
+                          <Eye className="h-4 w-4" />
+                          Details
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openSuspendModal(org);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#d1661c] to-[#f2994a] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                        >
+                          <Ban className="h-4 w-4" />
+                          Suspend
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteModal(org);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#d93f42] to-[#f08a8d] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-10 text-center">
+                <Building2 className="mx-auto h-12 w-12 text-[#a44255]" />
+                <h4 className="mt-4 text-xl font-semibold text-[#31101e]">
+                  No organizations found
+                </h4>
+                <p className="mt-2 text-[#7c4a5e]">
+                  Try changing the search or filter values.
                 </p>
               </div>
+            )}
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <StatBox
-                  label="Approved"
-                  value={loading ? "..." : stats.approved}
-                  color="text-emerald-300"
-                />
-                <StatBox
-                  label="Pending"
-                  value={loading ? "..." : stats.pending}
-                  color="text-amber-300"
-                />
-                <StatBox
-                  label="Rejected"
-                  value={loading ? "..." : stats.rejected}
-                  color="text-rose-300"
-                />
-                <StatBox
-                  label="Suspended"
-                  value={loading ? "..." : stats.suspended}
-                  color="text-slate-300"
-                />
+          {/* Pagination */}
+          {!loading && totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#ffe0e8] pt-6">
+              <p className="text-sm text-[#7c4a5e]">
+                Showing page {page} of {totalPages}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Prev
+                </button>
+
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const current = start + i;
+                  if (current > totalPages) return null;
+                  const active = current === page;
+                  return (
+                    <button
+                      key={current}
+                      onClick={() => setPage(current)}
+                      className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
+                        active
+                          ? "border-[#ff4d6d] bg-[#fff0f3] text-[#ff4d6d]"
+                          : "border-[#ffe0e8] bg-white/80 text-[#31101e] hover:bg-white"
+                      }`}
+                    >
+                      {current}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
-          </section>
-
-          {error && (
-            <div className="mt-6 rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-              {error}
-            </div>
           )}
+        </div>
 
-          {/* Filters */}
-          <section className="mt-8 grid gap-4 lg:grid-cols-[1fr_auto]">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-              <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search organization name, code, city, email..."
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-cyan-500 focus:bg-white/10"
+        {/* Details Panel */}
+        <aside className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                Selected organization
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                {selectedDetails ? "Overview" : "Choose one"}
+              </h3>
+            </div>
+
+            {selectedOrganization && (
+              <button
+                onClick={closeDetails}
+                className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-3 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-6">
+            {!selectedOrganization ? (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-8 text-center">
+                <Building2 className="mx-auto h-12 w-12 text-[#a44255]" />
+                <p className="mt-4 text-[#7c4a5e]">
+                  Click an organization to view details.
+                </p>
+              </div>
+            ) : detailsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-4 w-40 rounded bg-[#ffe0e8]" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e3f2fd]">
+                      <Building2 className="h-7 w-7 text-[#1e5aa8]" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-[#31101e]">
+                        {selectedDetails?.organizationName ||
+                          selectedDetails?.name ||
+                          "Organization"}
+                      </h4>
+                      <p className="mt-1 text-sm text-[#7c4a5e]">
+                        {normalizeTypeLabel(
+                          selectedDetails?.type ||
+                            selectedDetails?.organizationType,
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <InfoRow
+                    icon={Hash}
+                    label="Organization Code"
+                    value={
+                      selectedDetails?.organizationCode ||
+                      selectedDetails?._id ||
+                      selectedDetails?.id
+                    }
+                  />
+                  <InfoRow
+                    icon={Mail}
+                    label="Organization Email"
+                    value={
+                      selectedDetails?.email ||
+                      selectedDetails?.adminEmail ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={Phone}
+                    label="Phone Number"
+                    value={
+                      selectedDetails?.phone ||
+                      selectedDetails?.contactNumber ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={MapPin}
+                    label="City"
+                    value={
+                      selectedDetails?.city ||
+                      selectedDetails?.location?.city ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={MapPin}
+                    label="State"
+                    value={
+                      selectedDetails?.state ||
+                      selectedDetails?.location?.state ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={UserRound}
+                    label="Contact Person"
+                    value={
+                      selectedDetails?.contactPerson ||
+                      selectedDetails?.adminName ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={FileText}
+                    label="License Number"
+                    value={selectedDetails?.licenseNumber || "-"}
+                  />
+                  <InfoRow
+                    icon={CalendarDays}
+                    label="Submitted"
+                    value={formatDate(
+                      selectedDetails?.createdAt ||
+                        selectedDetails?.submittedAt,
+                    )}
+                  />
+                  <InfoRow
+                    icon={Clock3}
+                    label="Status"
+                    value={normalizeStatusLabel(
+                      selectedDetails?.status || "UNKNOWN",
+                    )}
+                    highlight
                   />
                 </div>
 
-                <div className="relative">
-                  <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-12 text-white outline-none transition focus:border-cyan-500 focus:bg-white/10"
-                  >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-slate-950"
-                      >
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="relative">
-                  <Building2 className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <select
-                    value={typeFilter}
-                    onChange={(e) => {
-                      setTypeFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-12 text-white outline-none transition focus:border-cyan-500 focus:bg-white/10"
-                  >
-                    {TYPE_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-slate-950"
-                      >
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Current view
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {normalizeStatusLabel(statusFilter)} •{" "}
-                  {TYPE_OPTIONS.find((o) => o.value === typeFilter)?.label ||
-                    "All Types"}
-                </p>
-              </div>
-
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Page
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {page} / {totalPages}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          {/* Content */}
-          <section className="mt-8 grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-            {/* List */}
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                    Organization directory
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                    Notes
                   </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    All organizations
-                  </h3>
-                </div>
-
-                <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-gray-300">
-                  <Building2 className="h-4 w-4 text-cyan-300" />
-                  {loading ? "Loading..." : `${totalItems} results`}
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="animate-pulse rounded-[26px] border border-white/10 bg-slate-950/40 p-5"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-3">
-                          <div className="h-4 w-56 rounded bg-white/10" />
-                          <div className="h-3 w-44 rounded bg-white/10" />
-                          <div className="h-3 w-32 rounded bg-white/10" />
-                        </div>
-                        <div className="h-10 w-28 rounded-2xl bg-white/10" />
-                      </div>
-                    </div>
-                  ))
-                ) : visibleOrganizations.length > 0 ? (
-                  visibleOrganizations.map((org) => {
-                    const id = org._id || org.id || org.organizationCode;
-                    const isActive =
-                      selectedOrganization &&
-                      (selectedOrganization._id ||
-                        selectedOrganization.id ||
-                        selectedOrganization.organizationCode) === id;
-
-                    const typeLabel = normalizeTypeLabel(
-                      org.type || org.organizationType,
-                    );
-                    const statusLabel = normalizeStatusLabel(org.status);
-
-                    return (
-                      <div
-                        key={id}
-                        className={`rounded-[26px] border p-5 transition cursor-pointer ${
-                          isActive
-                            ? "border-cyan-500/40 bg-cyan-500/10"
-                            : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                        }`}
-                        onClick={() => openDetails(org)}
-                      >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-3">
-                              <h4 className="text-lg font-bold text-white">
-                                {org.organizationName ||
-                                  org.name ||
-                                  "Organization"}
-                              </h4>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                                {typeLabel}
-                              </span>
-                              <span
-                                className={`rounded-full border px-3 py-1 text-xs ${getStatusStyle(org.status)}`}
-                              >
-                                {statusLabel}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-400">
-                              <span className="inline-flex items-center gap-2">
-                                <Hash className="h-4 w-4" />
-                                {org.organizationCode || id}
-                              </span>
-                              <span className="inline-flex items-center gap-2">
-                                <MapPin className="h-4 w-4" />
-                                {org.city ||
-                                  org.location?.city ||
-                                  "Unknown city"}
-                              </span>
-                              <span className="inline-flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
-                                {org.email || org.adminEmail || "No email"}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-3">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDetails(org);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                            >
-                              <Eye className="h-4 w-4" />
-                              Details
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openSuspendModal(org);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                            >
-                              <Ban className="h-4 w-4" />
-                              Suspend
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDeleteModal(org);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-10 text-center">
-                    <Building2 className="mx-auto h-12 w-12 text-gray-500" />
-                    <h4 className="mt-4 text-xl font-bold text-white">
-                      No organizations found
-                    </h4>
-                    <p className="mt-2 text-gray-400">
-                      Try changing the search or filter values.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Pagination */}
-              {!loading && totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
-                  <p className="text-sm text-gray-400">
-                    Showing page {page} of {totalPages}
+                  <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                    Use Suspend for temporary removal and Delete for permanent
+                    removal. Both actions are protected by confirmation modals.
                   </p>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Prev
-                    </button>
-
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      const start = Math.max(
-                        1,
-                        Math.min(page - 2, totalPages - 4),
-                      );
-                      const current = start + i;
-                      if (current > totalPages) return null;
-                      const active = current === page;
-                      return (
-                        <button
-                          key={current}
-                          onClick={() => setPage(current)}
-                          className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
-                            active
-                              ? "border-cyan-500/30 bg-cyan-500/15 text-cyan-300"
-                              : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-                          }`}
-                        >
-                          {current}
-                        </button>
-                      );
-                    })}
-
-                    <button
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
                 </div>
-              )}
-            </div>
-
-            {/* Details Panel */}
-            <aside className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                    Selected organization
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    {selectedDetails ? "Overview" : "Choose one"}
-                  </h3>
-                </div>
-
-                {selectedOrganization && (
-                  <button
-                    onClick={closeDetails}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-3 text-gray-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
               </div>
-
-              <div className="mt-6">
-                {!selectedOrganization ? (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-8 text-center">
-                    <Building2 className="mx-auto h-12 w-12 text-gray-500" />
-                    <p className="mt-4 text-gray-400">
-                      Click an organization to view details.
-                    </p>
-                  </div>
-                ) : detailsLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                      >
-                        <div className="h-3 w-24 rounded bg-white/10" />
-                        <div className="mt-2 h-4 w-40 rounded bg-white/10" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/15">
-                          <Building2 className="h-7 w-7 text-cyan-300" />
-                        </div>
-                        <div>
-                          <h4 className="text-xl font-bold text-white">
-                            {selectedDetails?.organizationName ||
-                              selectedDetails?.name ||
-                              "Organization"}
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-400">
-                            {normalizeTypeLabel(
-                              selectedDetails?.type ||
-                                selectedDetails?.organizationType,
-                            )}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3">
-                      <InfoRow
-                        icon={Hash}
-                        label="Organization Code"
-                        value={
-                          selectedDetails?.organizationCode ||
-                          selectedDetails?._id ||
-                          selectedDetails?.id
-                        }
-                      />
-                      <InfoRow
-                        icon={Mail}
-                        label="Organization Email"
-                        value={
-                          selectedDetails?.email ||
-                          selectedDetails?.adminEmail ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={Phone}
-                        label="Phone Number"
-                        value={
-                          selectedDetails?.phone ||
-                          selectedDetails?.contactNumber ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={MapPin}
-                        label="City"
-                        value={
-                          selectedDetails?.city ||
-                          selectedDetails?.location?.city ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={MapPin}
-                        label="State"
-                        value={
-                          selectedDetails?.state ||
-                          selectedDetails?.location?.state ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={UserRound}
-                        label="Contact Person"
-                        value={
-                          selectedDetails?.contactPerson ||
-                          selectedDetails?.adminName ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={FileText}
-                        label="License Number"
-                        value={selectedDetails?.licenseNumber || "-"}
-                      />
-                      <InfoRow
-                        icon={CalendarDays}
-                        label="Submitted"
-                        value={formatDate(
-                          selectedDetails?.createdAt ||
-                            selectedDetails?.submittedAt,
-                        )}
-                      />
-                      <InfoRow
-                        icon={Clock3}
-                        label="Status"
-                        value={normalizeStatusLabel(
-                          selectedDetails?.status || "UNKNOWN",
-                        )}
-                        highlight
-                      />
-                    </div>
-
-                    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-                      <p className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                        Notes
-                      </p>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                        Use Suspend for temporary removal and Delete for
-                        permanent removal. Both actions are protected by
-                        confirmation modals.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </aside>
-          </section>
-        </main>
+            )}
+          </div>
+        </aside>
       </div>
 
       {/* Suspend Modal */}
@@ -917,37 +862,37 @@ export default function Organizations() {
           loading={processing}
         />
       )}
-    </div>
+    </section>
   );
 }
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${color}`}>{value}</p>
-      <p className="mt-1 text-xs text-gray-500">Organizations</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+      <p className="text-xs text-[#7c4a5e]">{label}</p>
+      <p className={`mt-2 text-3xl font-semibold ${color}`}>{value}</p>
+      <p className="mt-1 text-xs text-[#a44255]">Organizations</p>
     </div>
   );
 }
 
 function InfoRow({ icon: Icon, label, value, highlight = false }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
       <div className="flex items-start gap-3">
         <div
-          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-cyan-500/15" : "bg-white/10"}`}
+          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-[#e3f2fd]" : "bg-[#ffe0e8]"}`}
         >
           <Icon
-            className={`h-4 w-4 ${highlight ? "text-cyan-300" : "text-gray-300"}`}
+            className={`h-4 w-4 ${highlight ? "text-[#1e5aa8]" : "text-[#7c4a5e]"}`}
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
             {label}
           </p>
           <p
-            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-cyan-300" : "text-white"}`}
+            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-[#1e5aa8]" : "text-[#31101e]"}`}
           >
             {value || "-"}
           </p>
@@ -967,30 +912,30 @@ function SuspendModal({
   loading,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d1661c] to-[#f2994a]">
             <Ban className="h-7 w-7 text-white" />
           </div>
 
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="mt-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
             Suspension reason
           </label>
           <textarea
@@ -998,21 +943,21 @@ function SuspendModal({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Explain why this organization is being suspended..."
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-amber-500 focus:bg-white/10 resize-none"
+            className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#d1661c] focus:bg-white resize-none"
           />
         </div>
 
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-2xl bg-gradient-to-r from-[#d1661c] to-[#f2994a] px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Suspending..." : "Suspend"}
           </button>
@@ -1033,55 +978,55 @@ function DeleteModal({
   loading,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-red-500">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d93f42] to-[#f08a8d]">
             <Trash2 className="h-7 w-7 text-white" />
           </div>
 
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-100">
+        <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           Type <strong>{targetName}</strong> to confirm permanent deletion.
         </div>
 
         <div className="mt-5">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
             Confirmation text
           </label>
           <input
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder={targetName}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+            className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#d93f42] focus:bg-white"
           />
         </div>
 
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-2xl bg-gradient-to-r from-[#d93f42] to-[#f08a8d] px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Deleting..." : "Delete"}
           </button>

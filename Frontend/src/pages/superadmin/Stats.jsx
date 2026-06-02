@@ -43,7 +43,7 @@ export default function CaseStudiesPage() {
       impact: "Faster response cycles",
       duration: "6 Weeks",
       href: "/case-studies/bloodbridge-platform",
-      accent: "from-red-500 via-pink-500 to-rose-500",
+      accent: "from-[#d93f42] via-[#ff4d6d] to-[#9b1e27]",
       icon: ShieldCheck,
     },
     {
@@ -66,7 +66,7 @@ export default function CaseStudiesPage() {
       impact: "Better admin productivity",
       duration: "4 Weeks",
       href: "/case-studies/healthcare-dashboard",
-      accent: "from-cyan-500 via-blue-500 to-indigo-500",
+      accent: "from-[#1e5aa8] via-[#6fb1ff] to-[#9b1e27]",
       icon: BarChart3,
     },
     {
@@ -89,7 +89,7 @@ export default function CaseStudiesPage() {
       impact: "Higher completion clarity",
       duration: "3 Weeks",
       href: "/case-studies/donor-workflow",
-      accent: "from-emerald-500 via-teal-500 to-cyan-500",
+      accent: "from-[#2c8a49] via-[#5ec271] to-[#1e5aa8]",
       icon: Users,
     },
     {
@@ -112,7 +112,7 @@ export default function CaseStudiesPage() {
       impact: "Cleaner onboarding",
       duration: "2 Weeks",
       href: "/case-studies/organization-onboarding",
-      accent: "from-violet-500 via-fuchsia-500 to-pink-500",
+      accent: "from-[#9b1e27] via-[#ff4d6d] to-[#d93f42]",
       icon: Layers3,
     },
     {
@@ -135,7 +135,7 @@ export default function CaseStudiesPage() {
       impact: "Stronger first impression",
       duration: "1 Week",
       href: "/case-studies/landing-redesign",
-      accent: "from-amber-500 via-orange-500 to-red-500",
+      accent: "from-[#d1661c] via-[#f2994a] to-[#d93f42]",
       icon: Sparkles,
     },
   ];
@@ -176,428 +176,381 @@ export default function CaseStudiesPage() {
   const featuredIcon = featuredStudy.icon;
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-red-500/20 blur-3xl" />
-        <div className="absolute top-20 right-0 h-[420px] w-[420px] rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-purple-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Case Studies
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            Design systems, workflows, and outcomes
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            A curated set of case studies showing how BloodBridge evolved
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => window.history.back()}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            Back
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <button
-                onClick={() => window.history.back()}
-                className="flex items-center gap-3 group"
-              >
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-2xl bg-red-500/30 blur-2xl" />
-                  <div className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-pink-500 shadow-lg shadow-red-500/20">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                </div>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-3">
+        <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <p className="text-xs text-[#7c4a5e]">Projects</p>
+          <p className="mt-2 text-3xl font-semibold text-[#ff4d6d]">5+</p>
+          <p className="mt-1 text-xs text-[#a44255]">Completed</p>
+        </div>
+        <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <p className="text-xs text-[#7c4a5e]">Flows</p>
+          <p className="mt-2 text-3xl font-semibold text-[#1e5aa8]">3</p>
+          <p className="mt-1 text-xs text-[#a44255]">Redesigned</p>
+        </div>
+        <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <p className="text-xs text-[#7c4a5e]">Platform</p>
+          <p className="mt-2 text-3xl font-semibold text-[#2c8a49]">1</p>
+          <p className="mt-1 text-xs text-[#a44255]">Unified system</p>
+        </div>
+      </div>
 
-                <div className="text-left leading-tight">
-                  <span className="block text-lg sm:text-xl font-extrabold tracking-tight text-white">
-                    BloodBridge
-                  </span>
-                  <span className="block text-xs sm:text-sm text-gray-400">
-                    Case studies archive
-                  </span>
-                </div>
-              </button>
+      {/* Filters */}
+      <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search case studies, technology, result, or problem..."
+              className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-5 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            />
+          </div>
 
-              <div className="hidden sm:flex items-center gap-3">
-                <Link
-                  href="/"
-                  className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => {
+              const active = activeFilter === category;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setActiveFilter(category)}
+                  className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
+                    active
+                      ? "border-[#ff4d6d] bg-[#fff0f3] text-[#ff4d6d]"
+                      : "border-[#ffe0e8] bg-white/80 text-[#7c4a5e] hover:bg-white"
+                  }`}
                 >
-                  Home
-                </Link>
+                  {category === "all" ? "All" : category}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-                <Link
-                  href="/contact"
-                  className="rounded-full bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-red-500/25 transition hover:scale-[1.03]"
-                >
-                  Contact
-                </Link>
-              </div>
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Results
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {filteredStudies.length} case study
+              {filteredStudies.length === 1 ? "" : "ies"}
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-3">
+            <Filter className="h-5 w-5 text-[#7c4a5e]" />
+          </div>
+        </div>
+      </div>
+
+      {/* Featured Study */}
+      <div className="relative overflow-hidden rounded-3xl border border-[#ffe0e8] bg-white/90 p-8 sm:p-10 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+        <div
+          className={`absolute inset-0 bg-gradient-to-br ${featuredStudy.accent} opacity-5`}
+        />
+        <div className="relative z-10">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#ff4d6d]">
+              Featured study
+            </span>
+            <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]">
+              {featuredStudy.category}
+            </span>
+            <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]">
+              {featuredStudy.tag}
+            </span>
+          </div>
+
+          <div className="mt-8 flex items-start gap-5">
+            <div
+              className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${featuredStudy.accent} shadow-lg`}
+            >
+              <featuredIcon className="h-8 w-8 text-white" />
+            </div>
+
+            <div className="flex-1">
+              <h2 className="text-3xl sm:text-4xl font-semibold leading-tight text-[#31101e]">
+                {featuredStudy.title}
+              </h2>
+              <p className="mt-4 max-w-2xl text-[#7c4a5e] leading-relaxed">
+                {featuredStudy.summary}
+              </p>
             </div>
           </div>
-        </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-12">
-          <section className="text-center max-w-5xl mx-auto pt-4 pb-12">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300 backdrop-blur-xl">
-              <Star className="h-4 w-4 text-amber-300" />
-              Selected product stories and redesigns
+          <div className="mt-10 grid gap-4 md:grid-cols-2">
+            <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[#d93f42]">
+                <Target className="h-4 w-4" />
+                Problem
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                {featuredStudy.problem}
+              </p>
             </div>
 
-            <h1 className="mt-7 text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.95]">
-              <span className="block text-white">Design systems,</span>
-              <span className="block bg-gradient-to-r from-red-400 via-pink-400 to-cyan-400 bg-clip-text text-transparent">
-                workflows, and outcomes
-              </span>
-            </h1>
+            <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[#1e5aa8]">
+                <Zap className="h-4 w-4" />
+                Solution
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                {featuredStudy.solution}
+              </p>
+            </div>
+          </div>
 
-            <p className="mx-auto mt-7 max-w-3xl text-lg sm:text-xl leading-relaxed text-gray-400">
-              A curated set of case studies showing how BloodBridge evolved from
-              concept screens into a cleaner, more usable healthcare platform.
+          <div className="mt-8 grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-[#ffe0e8] bg-white/80 p-4">
+              <p className="text-xs text-[#7c4a5e]">Impact</p>
+              <p className="mt-2 font-semibold text-[#31101e]">
+                {featuredStudy.impact}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#ffe0e8] bg-white/80 p-4">
+              <p className="text-xs text-[#7c4a5e]">Duration</p>
+              <p className="mt-2 font-semibold text-[#31101e]">
+                {featuredStudy.duration}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-[#ffe0e8] bg-white/80 p-4">
+              <p className="text-xs text-[#7c4a5e]">Tech Stack</p>
+              <p className="mt-2 font-semibold text-[#31101e]">
+                {featuredStudy.technologies.slice(0, 2).join(" · ")}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex flex-wrap gap-3">
+            {featuredStudy.technologies.map((tech) => (
+              <span
+                key={tech}
+                className="rounded-full border border-[#ffe0e8] bg-[#fff7f9] px-3 py-1 text-xs font-semibold text-[#7c4a5e]"
+              >
+                {tech}
+              </span>
+            ))}
+          </div>
+
+          <div className="mt-8 flex flex-col sm:flex-row gap-4">
+            <Link
+              href={featuredStudy.href}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#d93f42] via-[#ff4d6d] to-[#9b1e27] px-6 py-4 font-semibold text-white shadow-md transition hover:shadow-lg"
+            >
+              View full case study
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+
+            <button
+              onClick={() => {
+                const next = visibleStudies[0] || caseStudies[1];
+                if (next) {
+                  setSearchTerm("");
+                  setActiveFilter("all");
+                  window.location.hash = next.id;
+                }
+              }}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-6 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Explore another study
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Highlights */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                Highlights
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                What this page shows
+              </h3>
+            </div>
+            <TrendingUp className="h-6 w-6 text-[#2c8a49]" />
+          </div>
+
+          <div className="mt-6 space-y-4">
+            <HighlightRow
+              title="Platform thinking"
+              text="How BloodBridge evolved into a structured product."
+            />
+            <HighlightRow
+              title="Flow improvements"
+              text="How registration and approval journeys became clearer."
+            />
+            <HighlightRow
+              title="Design quality"
+              text="How the UI became more premium and startup-ready."
+            />
+          </div>
+        </div>
+
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                Outcome
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                Key result
+              </h3>
+            </div>
+            <TimerReset className="h-6 w-6 text-[#1e5aa8]" />
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+            <p className="text-sm text-[#7c4a5e]">
+              Better structure, better hierarchy, and better navigation across
+              all user roles.
             </p>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-3 max-w-3xl mx-auto">
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-xl">
-                <div className="text-3xl font-black text-white">5+</div>
-                <div className="mt-1 text-sm text-gray-400">Projects</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-xl">
-                <div className="text-3xl font-black text-white">3</div>
-                <div className="mt-1 text-sm text-gray-400">Flows</div>
-              </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5 backdrop-blur-xl">
-                <div className="text-3xl font-black text-white">1</div>
-                <div className="mt-1 text-sm text-gray-400">
-                  Unified platform
-                </div>
-              </div>
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-[#2c8a49]/20 bg-[#e8f5e9] p-4">
+              <CheckCircle2 className="h-5 w-5 text-[#2c8a49]" />
+              <p className="text-sm font-medium text-[#2c8a49]">
+                More polished and product-led presentation
+              </p>
             </div>
-          </section>
-
-          <section className="grid gap-4 lg:grid-cols-[1fr_auto]">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-              <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search case studies, technology, result, or problem..."
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-red-500 focus:bg-white/10"
-                  />
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {categories.map((category) => {
-                    const active = activeFilter === category;
-                    return (
-                      <button
-                        key={category}
-                        onClick={() => setActiveFilter(category)}
-                        className={`rounded-2xl border px-4 py-3 text-sm font-semibold transition ${
-                          active
-                            ? "border-red-500/30 bg-red-500/15 text-red-300"
-                            : "border-white/10 bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
-                        }`}
-                      >
-                        {category === "all" ? "All" : category}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Results
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {filteredStudies.length} case study
-                  {filteredStudies.length === 1 ? "" : "ies"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-3">
-                <Filter className="h-5 w-5 text-gray-300" />
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-8 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-            <div className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-br from-white/5 via-white/5 to-white/10 p-8 sm:p-10 backdrop-blur-2xl">
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${featuredStudy.accent} opacity-10`}
-              />
-              <div className="relative z-10">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                    Featured study
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                    {featuredStudy.category}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                    {featuredStudy.tag}
-                  </span>
-                </div>
-
-                <div className="mt-8 flex items-start gap-5">
-                  <div
-                    className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br ${featuredStudy.accent} shadow-2xl`}
-                  >
-                    <featuredIcon className="h-8 w-8 text-white" />
-                  </div>
-
-                  <div className="flex-1">
-                    <h2 className="text-3xl sm:text-4xl font-black leading-tight text-white">
-                      {featuredStudy.title}
-                    </h2>
-                    <p className="mt-4 max-w-2xl text-gray-300 leading-relaxed">
-                      {featuredStudy.summary}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-10 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                    <div className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-red-300">
-                      <Target className="h-4 w-4" />
-                      Problem
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                      {featuredStudy.problem}
-                    </p>
-                  </div>
-
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                    <div className="flex items-center gap-2 text-sm uppercase tracking-[0.2em] text-cyan-300">
-                      <Zap className="h-4 w-4" />
-                      Solution
-                    </div>
-                    <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                      {featuredStudy.solution}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-8 grid gap-4 md:grid-cols-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-gray-400">Impact</p>
-                    <p className="mt-2 font-semibold text-white">
-                      {featuredStudy.impact}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-gray-400">Duration</p>
-                    <p className="mt-2 font-semibold text-white">
-                      {featuredStudy.duration}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                    <p className="text-xs text-gray-400">Tech Stack</p>
-                    <p className="mt-2 font-semibold text-white">
-                      {featuredStudy.technologies.slice(0, 2).join(" · ")}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex flex-wrap gap-3">
-                  {featuredStudy.technologies.map((tech) => (
-                    <span
-                      key={tech}
-                      className="rounded-full border border-white/10 bg-slate-950/40 px-3 py-1 text-xs text-gray-300"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                  <Link
-                    href={featuredStudy.href}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-red-500 via-pink-500 to-rose-500 px-6 py-4 font-semibold text-white transition hover:scale-[1.02]"
-                  >
-                    View full case study
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-
-                  <button
-                    onClick={() => {
-                      const next = visibleStudies[0] || caseStudies[1];
-                      if (next) {
-                        setSearchTerm("");
-                        setActiveFilter("all");
-                        window.location.hash = next.id;
-                      }
-                    }}
-                    className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 font-semibold text-white transition hover:bg-white/10"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    Explore another study
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-5">
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-emerald-300">
-                      Highlights
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      What this page shows
-                    </h3>
-                  </div>
-                  <TrendingUp className="h-6 w-6 text-emerald-300" />
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  <HighlightRow
-                    title="Platform thinking"
-                    text="How BloodBridge evolved into a structured product."
-                  />
-                  <HighlightRow
-                    title="Flow improvements"
-                    text="How registration and approval journeys became clearer."
-                  />
-                  <HighlightRow
-                    title="Design quality"
-                    text="How the UI became more premium and startup-ready."
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.25em] text-cyan-300">
-                      Outcome
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Key result
-                    </h3>
-                  </div>
-                  <TimerReset className="h-6 w-6 text-cyan-300" />
-                </div>
-
-                <div className="mt-6 rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                  <p className="text-sm text-gray-400">
-                    Better structure, better hierarchy, and better navigation
-                    across all user roles.
-                  </p>
-
-                  <div className="mt-5 flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
-                    <CheckCircle2 className="h-5 w-5 text-emerald-300" />
-                    <p className="text-sm font-medium text-emerald-200">
-                      More polished and product-led presentation
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-10">
-            <div className="flex items-end justify-between gap-4 mb-6">
-              <div>
-                <p className="text-sm uppercase tracking-[0.25em] text-gray-400">
-                  All studies
-                </p>
-                <h2 className="mt-2 text-3xl font-black text-white">
-                  More stories
-                </h2>
-              </div>
-            </div>
-
-            {visibleStudies.length > 0 ? (
-              <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-                {visibleStudies.map((study) => {
-                  const Icon = study.icon;
-                  return (
-                    <article
-                      key={study.id}
-                      id={study.id}
-                      className="group relative overflow-hidden rounded-[30px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:border-white/20"
-                    >
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${study.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-10`}
-                      />
-                      <div className="relative z-10">
-                        <div className="flex items-start justify-between gap-4">
-                          <div
-                            className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${study.accent}`}
-                          >
-                            <Icon className="h-7 w-7 text-white" />
-                          </div>
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                            {study.category}
-                          </span>
-                        </div>
-
-                        <h3 className="mt-6 text-2xl font-bold text-white leading-tight">
-                          {study.title}
-                        </h3>
-
-                        <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                          {study.summary}
-                        </p>
-
-                        <div className="mt-5 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-                          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
-                            Result
-                          </p>
-                          <p className="mt-2 text-sm text-gray-300">
-                            {study.impact}
-                          </p>
-                        </div>
-
-                        <div className="mt-5 flex flex-wrap gap-2">
-                          {study.technologies.slice(0, 3).map((tech) => (
-                            <span
-                              key={tech}
-                              className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-
-                        <div className="mt-6 flex items-center justify-between gap-3">
-                          <span className="text-xs text-gray-500">
-                            {study.duration}
-                          </span>
-
-                          <Link
-                            href={study.href}
-                            className="inline-flex items-center gap-2 text-sm font-semibold text-white transition group-hover:text-red-300"
-                          >
-                            Read case study
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                          </Link>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-10 text-center backdrop-blur-xl">
-                <Layers3 className="mx-auto h-12 w-12 text-gray-500" />
-                <h3 className="mt-4 text-2xl font-black text-white">
-                  No case studies found
-                </h3>
-                <p className="mt-2 text-gray-400">
-                  Try changing the search term or category filter.
-                </p>
-              </div>
-            )}
-          </section>
-        </main>
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* All Studies */}
+      <div>
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              All studies
+            </p>
+            <h2 className="mt-2 text-3xl font-semibold text-[#31101e]">
+              More stories
+            </h2>
+          </div>
+        </div>
+
+        {visibleStudies.length > 0 ? (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {visibleStudies.map((study) => {
+              const Icon = study.icon;
+              return (
+                <article
+                  key={study.id}
+                  id={study.id}
+                  className="group relative overflow-hidden rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)] transition hover:-translate-y-1 hover:shadow-lg"
+                >
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${study.accent} opacity-0 transition-opacity duration-500 group-hover:opacity-5`}
+                  />
+                  <div className="relative z-10">
+                    <div className="flex items-start justify-between gap-4">
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${study.accent}`}
+                      >
+                        <Icon className="h-7 w-7 text-white" />
+                      </div>
+                      <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]">
+                        {study.category}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-6 text-2xl font-semibold text-[#31101e] leading-tight">
+                      {study.title}
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                      {study.summary}
+                    </p>
+
+                    <div className="mt-5 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                        Result
+                      </p>
+                      <p className="mt-2 text-sm text-[#7c4a5e]">
+                        {study.impact}
+                      </p>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-2">
+                      {study.technologies.slice(0, 3).map((tech) => (
+                        <span
+                          key={tech}
+                          className="rounded-full border border-[#ffe0e8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]"
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      <span className="text-xs text-[#a44255]">
+                        {study.duration}
+                      </span>
+
+                      <Link
+                        href={study.href}
+                        className="inline-flex items-center gap-2 text-sm font-semibold text-[#ff4d6d] transition group-hover:text-[#9b1e27]"
+                      >
+                        Read case study
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </Link>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-10 text-center shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <Layers3 className="mx-auto h-12 w-12 text-[#a44255]" />
+            <h3 className="mt-4 text-2xl font-semibold text-[#31101e]">
+              No case studies found
+            </h3>
+            <p className="mt-2 text-[#7c4a5e]">
+              Try changing the search term or category filter.
+            </p>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
 
 function HighlightRow({ title, text }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-      <p className="font-semibold text-white">{title}</p>
-      <p className="mt-1 text-sm leading-relaxed text-gray-400">{text}</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+      <p className="font-semibold text-[#31101e]">{title}</p>
+      <p className="mt-1 text-sm leading-relaxed text-[#7c4a5e]">{text}</p>
     </div>
   );
 }

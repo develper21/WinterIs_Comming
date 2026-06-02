@@ -73,57 +73,57 @@ const getActionMeta = (action) => {
       return {
         label: "Login",
         icon: LogIn,
-        color: "text-cyan-300",
-        chip: "bg-cyan-500/10 border-cyan-500/20",
+        color: "text-[#1e5aa8]",
+        chip: "bg-[#e3f2fd] border-[#90caf9]",
       };
     case "CREATE":
       return {
         label: "Create",
         icon: PenSquare,
-        color: "text-emerald-300",
-        chip: "bg-emerald-500/10 border-emerald-500/20",
+        color: "text-[#2c8a49]",
+        chip: "bg-[#e8f5e9] border-[#a5d6a7]",
       };
     case "UPDATE":
       return {
         label: "Update",
         icon: ClipboardCheck,
-        color: "text-violet-300",
-        chip: "bg-violet-500/10 border-violet-500/20",
+        color: "text-[#9b1e27]",
+        chip: "bg-[#fce4ec] border-[#f8bbd0]",
       };
     case "DELETE":
       return {
         label: "Delete",
         icon: Trash2,
-        color: "text-rose-300",
-        chip: "bg-rose-500/10 border-rose-500/20",
+        color: "text-[#d93f42]",
+        chip: "bg-[#ffebee] border-[#ef9a9a]",
       };
     case "APPROVAL":
       return {
         label: "Approval",
         icon: CheckCircle2,
-        color: "text-amber-300",
-        chip: "bg-amber-500/10 border-amber-500/20",
+        color: "text-[#d1661c]",
+        chip: "bg-[#fff3e0] border-[#ffcc80]",
       };
     case "SUSPEND":
       return {
         label: "Suspend",
         icon: Ban,
-        color: "text-orange-300",
-        chip: "bg-orange-500/10 border-orange-500/20",
+        color: "text-[#f57c00]",
+        chip: "bg-[#ffe0b2] border-[#ffb74d]",
       };
     case "REACTIVATE":
       return {
         label: "Reactivate",
         icon: RefreshCcw,
-        color: "text-emerald-300",
-        chip: "bg-emerald-500/10 border-emerald-500/20",
+        color: "text-[#2c8a49]",
+        chip: "bg-[#e8f5e9] border-[#a5d6a7]",
       };
     default:
       return {
         label: action || "Other",
         icon: ActivityIcon,
-        color: "text-gray-300",
-        chip: "bg-white/5 border-white/10",
+        color: "text-[#7c4a5e]",
+        chip: "bg-[#fff7f9] border-[#ffe0e8]",
       };
   }
 };
@@ -352,535 +352,482 @@ export default function Activity() {
   }, [logs]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-violet-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Activity Logs
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">Audit Trail</h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Search logs, filter by action, inspect details, and export records
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleExport}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <Download className="h-4 w-4" />
+            Export
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={() => navigate("/superadmin/dashboard/overview")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 min-h-screen">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-cyan-400">
-                  Superadmin Activity
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white">
-                  Activity Logs
-                </h1>
-              </div>
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleExport}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <Download className="h-4 w-4" />
-                  Export
-                </button>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatBox
+          label="Logins"
+          value={loading ? "..." : stats.login}
+          color="text-[#1e5aa8]"
+        />
+        <StatBox
+          label="Creates"
+          value={loading ? "..." : stats.create}
+          color="text-[#2c8a49]"
+        />
+        <StatBox
+          label="Updates"
+          value={loading ? "..." : stats.update}
+          color="text-[#9b1e27]"
+        />
+        <StatBox
+          label="Approvals"
+          value={loading ? "..." : stats.approval}
+          color="text-[#d1661c]"
+        />
+      </div>
 
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                  />
-                  Refresh
-                </button>
+      {/* Filters */}
+      <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search user, entity, action, description..."
+              className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-5 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            />
+          </div>
 
-                <button
-                  onClick={() => navigate("/superadmin/dashboard")}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
+          <div className="relative min-w-[220px]">
+            <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <select
+              value={actionFilter}
+              onChange={(e) => {
+                setActionFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-12 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            >
+              {ACTION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Current view
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {ACTION_OPTIONS.find((o) => o.value === actionFilter)?.label ||
+                "All Actions"}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Page
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {page} / {totalPages}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                Audit trail
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                Recent activity logs
+              </h3>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-[#ffe0e8] bg-[#fff7f9] px-4 py-2 text-sm text-[#7c4a5e]">
+              <Clock3 className="h-4 w-4 text-[#1e5aa8]" />
+              {loading ? "Loading..." : `${totalItems} records`}
             </div>
           </div>
-        </header>
 
-        <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
-          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-            <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-violet-500/10 blur-3xl" />
-
-            <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-                  <Sparkles className="h-4 w-4" />
-                  Track actions across the platform
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              Array.from({ length: 8 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-3">
+                      <div className="h-4 w-56 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-44 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-32 rounded bg-[#ffe0e8]" />
+                    </div>
+                    <div className="h-10 w-28 rounded-2xl bg-[#ffe0e8]" />
+                  </div>
                 </div>
+              ))
+            ) : logs.length > 0 ? (
+              logs.map((log) => {
+                const id = log._id || log.id;
+                const meta = getActionMeta(log.action || log.type);
+                const ActionIcon = meta.icon;
+                const EntityIcon = getEntityIcon(
+                  log.entityType || log.targetType,
+                );
+                const isActive =
+                  selectedLog && (selectedLog._id || selectedLog.id) === id;
 
-                <h2 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                  Search logs, filter by action, inspect details, and export
-                  records
-                </h2>
+                return (
+                  <div
+                    key={id}
+                    className={`rounded-2xl border p-5 transition cursor-pointer ${
+                      isActive
+                        ? "border-[#ff4d6d] bg-[#fff0f3]"
+                        : "border-[#ffe0e8] bg-[#fff7f9] hover:border-[#ff4d6d] hover:shadow-md"
+                    }`}
+                    onClick={() => openDetails(log)}
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="space-y-2">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${meta.chip}`}
+                          >
+                            <ActionIcon className={`h-5 w-5 ${meta.color}`} />
+                          </div>
 
-                <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                  Review recent platform activity, inspect who did what, and
-                  export the current set of logs for auditing or reporting.
+                          <h4 className="text-lg font-semibold text-[#31101e]">
+                            {log.action || log.type || "Activity"}
+                          </h4>
+
+                          <span
+                            className={`rounded-full border px-3 py-1 text-xs font-semibold ${meta.chip} ${meta.color}`}
+                          >
+                            {meta.label}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#7c4a5e]">
+                          <span className="inline-flex items-center gap-2">
+                            <UserRound className="h-4 w-4" />
+                            {log.user?.name ||
+                              log.userName ||
+                              log.actorName ||
+                              "System"}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <EntityIcon className="h-4 w-4" />
+                            {log.entity?.name ||
+                              log.entityName ||
+                              log.targetName ||
+                              "Unknown entity"}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <CalendarDays className="h-4 w-4" />
+                            {formatDateTime(
+                              log.createdAt || log.timestamp || log.date,
+                            )}
+                          </span>
+                        </div>
+
+                        <p className="max-w-4xl text-sm leading-relaxed text-[#7c4a5e]">
+                          {log.description ||
+                            log.message ||
+                            "No description provided"}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetails(log);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-10 text-center">
+                <ActivityIcon className="mx-auto h-12 w-12 text-[#a44255]" />
+                <h4 className="mt-4 text-xl font-semibold text-[#31101e]">
+                  No activity logs found
+                </h4>
+                <p className="mt-2 text-[#7c4a5e]">
+                  Try changing the search or action filter.
                 </p>
               </div>
+            )}
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <StatBox
-                  label="Logins"
-                  value={loading ? "..." : stats.login}
-                  color="text-cyan-300"
-                />
-                <StatBox
-                  label="Creates"
-                  value={loading ? "..." : stats.create}
-                  color="text-emerald-300"
-                />
-                <StatBox
-                  label="Updates"
-                  value={loading ? "..." : stats.update}
-                  color="text-violet-300"
-                />
-                <StatBox
-                  label="Approvals"
-                  value={loading ? "..." : stats.approval}
-                  color="text-amber-300"
-                />
+          {!loading && totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#ffe0e8] pt-6">
+              <p className="text-sm text-[#7c4a5e]">
+                Showing page {page} of {totalPages}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Prev
+                </button>
+
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const current = start + i;
+                  if (current > totalPages) return null;
+                  const active = current === page;
+                  return (
+                    <button
+                      key={current}
+                      onClick={() => setPage(current)}
+                      className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
+                        active
+                          ? "border-[#ff4d6d] bg-[#fff0f3] text-[#ff4d6d]"
+                          : "border-[#ffe0e8] bg-white/80 text-[#31101e] hover:bg-white"
+                      }`}
+                    >
+                      {current}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
-          </section>
-
-          {error && (
-            <div className="rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-              {error}
-            </div>
           )}
+        </div>
 
-          <section className="mt-8 grid gap-4 lg:grid-cols-[1fr_auto]">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-              <div className="grid gap-4 md:grid-cols-[1fr_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search user, entity, action, description..."
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-cyan-500 focus:bg-white/10"
+        <aside className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                Log details
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                {selectedLog ? "Overview" : "Select a log"}
+              </h3>
+            </div>
+
+            {selectedLog && (
+              <button
+                onClick={closeDetails}
+                className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-3 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-6">
+            {!selectedLog ? (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-8 text-center">
+                <ActivityIcon className="mx-auto h-12 w-12 text-[#a44255]" />
+                <p className="mt-4 text-[#7c4a5e]">
+                  Click a log to inspect full details.
+                </p>
+              </div>
+            ) : detailsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-4 w-40 rounded bg-[#ffe0e8]" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#e3f2fd]">
+                      {(() => {
+                        const MetaIcon = getActionMeta(
+                          selectedLog?.action || selectedLog?.type,
+                        ).icon;
+                        return <MetaIcon className="h-7 w-7 text-[#1e5aa8]" />;
+                      })()}
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-[#31101e]">
+                        {selectedLog?.action || selectedLog?.type || "Activity"}
+                      </h4>
+                      <p className="mt-1 text-sm text-[#7c4a5e]">
+                        {selectedLog?.description ||
+                          selectedLog?.message ||
+                          "Audit record"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <InfoRow
+                    icon={UserRound}
+                    label="User"
+                    value={
+                      selectedLog?.user?.name ||
+                      selectedLog?.userName ||
+                      selectedLog?.actorName ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={Building2}
+                    label="Entity"
+                    value={
+                      selectedLog?.entity?.name ||
+                      selectedLog?.entityName ||
+                      selectedLog?.targetName ||
+                      "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={Layers3}
+                    label="Entity Type"
+                    value={
+                      selectedLog?.entityType || selectedLog?.targetType || "-"
+                    }
+                  />
+                  <InfoRow
+                    icon={CalendarDays}
+                    label="Date"
+                    value={formatDateTime(
+                      selectedLog?.createdAt ||
+                        selectedLog?.timestamp ||
+                        selectedLog?.date,
+                    )}
+                  />
+                  <InfoRow
+                    icon={AlertTriangle}
+                    label="IP Address"
+                    value={selectedLog?.ipAddress || selectedLog?.ip || "-"}
+                  />
+                  <InfoRow
+                    icon={ShieldCheck}
+                    label="Status"
+                    value={selectedLog?.status || "Completed"}
+                    highlight
                   />
                 </div>
 
-                <div className="relative min-w-[220px]">
-                  <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <select
-                    value={actionFilter}
-                    onChange={(e) => {
-                      setActionFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-12 text-white outline-none transition focus:border-cyan-500 focus:bg-white/10"
-                  >
-                    {ACTION_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-slate-950"
-                      >
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Current view
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {ACTION_OPTIONS.find((o) => o.value === actionFilter)
-                    ?.label || "All Actions"}
-                </p>
-              </div>
-
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Page
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {page} / {totalPages}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                    Audit trail
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                    Full description
                   </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    Recent activity logs
-                  </h3>
-                </div>
-
-                <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-gray-300">
-                  <Clock3 className="h-4 w-4 text-cyan-300" />
-                  {loading ? "Loading..." : `${totalItems} records`}
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {loading ? (
-                  Array.from({ length: 8 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="animate-pulse rounded-[26px] border border-white/10 bg-slate-950/40 p-5"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-3">
-                          <div className="h-4 w-56 rounded bg-white/10" />
-                          <div className="h-3 w-44 rounded bg-white/10" />
-                          <div className="h-3 w-32 rounded bg-white/10" />
-                        </div>
-                        <div className="h-10 w-28 rounded-2xl bg-white/10" />
-                      </div>
-                    </div>
-                  ))
-                ) : logs.length > 0 ? (
-                  logs.map((log) => {
-                    const id = log._id || log.id;
-                    const meta = getActionMeta(log.action || log.type);
-                    const ActionIcon = meta.icon;
-                    const EntityIcon = getEntityIcon(
-                      log.entityType || log.targetType,
-                    );
-                    const isActive =
-                      selectedLog && (selectedLog._id || selectedLog.id) === id;
-
-                    return (
-                      <div
-                        key={id}
-                        className={`rounded-[26px] border p-5 transition cursor-pointer ${
-                          isActive
-                            ? "border-cyan-500/40 bg-cyan-500/10"
-                            : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                        }`}
-                        onClick={() => openDetails(log)}
-                      >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-3">
-                              <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-2xl border ${meta.chip}`}
-                              >
-                                <ActionIcon
-                                  className={`h-5 w-5 ${meta.color}`}
-                                />
-                              </div>
-
-                              <h4 className="text-lg font-bold text-white">
-                                {log.action || log.type || "Activity"}
-                              </h4>
-
-                              <span
-                                className={`rounded-full border px-3 py-1 text-xs ${meta.chip} ${meta.color}`}
-                              >
-                                {meta.label}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-400">
-                              <span className="inline-flex items-center gap-2">
-                                <UserRound className="h-4 w-4" />
-                                {log.user?.name ||
-                                  log.userName ||
-                                  log.actorName ||
-                                  "System"}
-                              </span>
-                              <span className="inline-flex items-center gap-2">
-                                <EntityIcon className="h-4 w-4" />
-                                {log.entity?.name ||
-                                  log.entityName ||
-                                  log.targetName ||
-                                  "Unknown entity"}
-                              </span>
-                              <span className="inline-flex items-center gap-2">
-                                <CalendarDays className="h-4 w-4" />
-                                {formatDateTime(
-                                  log.createdAt || log.timestamp || log.date,
-                                )}
-                              </span>
-                            </div>
-
-                            <p className="max-w-4xl text-sm leading-relaxed text-gray-300">
-                              {log.description ||
-                                log.message ||
-                                "No description provided"}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-wrap gap-3">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDetails(log);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-10 text-center">
-                    <ActivityIcon className="mx-auto h-12 w-12 text-gray-500" />
-                    <h4 className="mt-4 text-xl font-bold text-white">
-                      No activity logs found
-                    </h4>
-                    <p className="mt-2 text-gray-400">
-                      Try changing the search or action filter.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {!loading && totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
-                  <p className="text-sm text-gray-400">
-                    Showing page {page} of {totalPages}
+                  <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                    {selectedLog?.description ||
+                      selectedLog?.message ||
+                      "No additional description available."}
                   </p>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Prev
-                    </button>
-
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      const start = Math.max(
-                        1,
-                        Math.min(page - 2, totalPages - 4),
-                      );
-                      const current = start + i;
-                      if (current > totalPages) return null;
-                      const active = current === page;
-                      return (
-                        <button
-                          key={current}
-                          onClick={() => setPage(current)}
-                          className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
-                            active
-                              ? "border-cyan-500/30 bg-cyan-500/15 text-cyan-300"
-                              : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-                          }`}
-                        >
-                          {current}
-                        </button>
-                      );
-                    })}
-
-                    <button
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
                 </div>
-              )}
-            </div>
-
-            <aside className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                    Log details
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    {selectedLog ? "Overview" : "Select a log"}
-                  </h3>
-                </div>
-
-                {selectedLog && (
-                  <button
-                    onClick={closeDetails}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-3 text-gray-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
               </div>
-
-              <div className="mt-6">
-                {!selectedLog ? (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-8 text-center">
-                    <ActivityIcon className="mx-auto h-12 w-12 text-gray-500" />
-                    <p className="mt-4 text-gray-400">
-                      Click a log to inspect full details.
-                    </p>
-                  </div>
-                ) : detailsLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                      >
-                        <div className="h-3 w-24 rounded bg-white/10" />
-                        <div className="mt-2 h-4 w-40 rounded bg-white/10" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-500/15">
-                          {(() => {
-                            const MetaIcon = getActionMeta(
-                              selectedLog?.action || selectedLog?.type,
-                            ).icon;
-                            return (
-                              <MetaIcon className="h-7 w-7 text-cyan-300" />
-                            );
-                          })()}
-                        </div>
-                        <div>
-                          <h4 className="text-xl font-bold text-white">
-                            {selectedLog?.action ||
-                              selectedLog?.type ||
-                              "Activity"}
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-400">
-                            {selectedLog?.description ||
-                              selectedLog?.message ||
-                              "Audit record"}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3">
-                      <InfoRow
-                        icon={UserRound}
-                        label="User"
-                        value={
-                          selectedLog?.user?.name ||
-                          selectedLog?.userName ||
-                          selectedLog?.actorName ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={Building2}
-                        label="Entity"
-                        value={
-                          selectedLog?.entity?.name ||
-                          selectedLog?.entityName ||
-                          selectedLog?.targetName ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={Layers3}
-                        label="Entity Type"
-                        value={
-                          selectedLog?.entityType ||
-                          selectedLog?.targetType ||
-                          "-"
-                        }
-                      />
-                      <InfoRow
-                        icon={CalendarDays}
-                        label="Date"
-                        value={formatDateTime(
-                          selectedLog?.createdAt ||
-                            selectedLog?.timestamp ||
-                            selectedLog?.date,
-                        )}
-                      />
-                      <InfoRow
-                        icon={AlertTriangle}
-                        label="IP Address"
-                        value={selectedLog?.ipAddress || selectedLog?.ip || "-"}
-                      />
-                      <InfoRow
-                        icon={ShieldCheck}
-                        label="Status"
-                        value={selectedLog?.status || "Completed"}
-                        highlight
-                      />
-                    </div>
-
-                    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-                      <p className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                        Full description
-                      </p>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                        {selectedLog?.description ||
-                          selectedLog?.message ||
-                          "No additional description available."}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </aside>
-          </section>
-        </main>
+            )}
+          </div>
+        </aside>
       </div>
-    </div>
+    </section>
   );
 }
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${color}`}>{value}</p>
-      <p className="mt-1 text-xs text-gray-500">Logs</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+      <p className="text-xs text-[#7c4a5e]">{label}</p>
+      <p className={`mt-2 text-3xl font-semibold ${color}`}>{value}</p>
+      <p className="mt-1 text-xs text-[#a44255]">Logs</p>
     </div>
   );
 }
 
 function InfoRow({ icon: Icon, label, value, highlight = false }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
       <div className="flex items-start gap-3">
         <div
-          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-emerald-500/15" : "bg-white/10"}`}
+          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-[#e8f5e9]" : "bg-[#ffe0e8]"}`}
         >
           <Icon
-            className={`h-4 w-4 ${highlight ? "text-emerald-300" : "text-gray-300"}`}
+            className={`h-4 w-4 ${highlight ? "text-[#2c8a49]" : "text-[#7c4a5e]"}`}
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
             {label}
           </p>
           <p
-            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-emerald-300" : "text-white"}`}
+            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-[#2c8a49]" : "text-[#31101e]"}`}
           >
             {value || "-"}
           </p>

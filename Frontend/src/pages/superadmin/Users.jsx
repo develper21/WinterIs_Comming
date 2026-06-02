@@ -99,40 +99,40 @@ const normalizeStatusLabel = (value) => {
 const getStatusStyle = (status) => {
   switch (String(status || "").toUpperCase()) {
     case "ACTIVE":
-      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
+      return "bg-emerald-100 border-emerald-300 text-emerald-700";
     case "INACTIVE":
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
     case "SUSPENDED":
-      return "bg-rose-500/10 border-rose-500/20 text-rose-300";
+      return "bg-red-100 border-red-300 text-red-700";
     default:
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
   }
 };
 
 const roleMeta = {
   ADMIN: {
     icon: ShieldCheck,
-    accent: "text-amber-300",
+    accent: "text-[#d1661c]",
   },
   STAFF: {
     icon: Briefcase,
-    accent: "text-cyan-300",
+    accent: "text-[#1e5aa8]",
   },
   DOCTOR: {
     icon: Stethoscope,
-    accent: "text-emerald-300",
+    accent: "text-[#2c8a49]",
   },
   HOSPITAL: {
     icon: Briefcase,
-    accent: "text-blue-300",
+    accent: "text-[#6fb1ff]",
   },
   BLOODBANK: {
     icon: Activity,
-    accent: "text-rose-300",
+    accent: "text-[#d93f42]",
   },
   NGO: {
     icon: Users,
-    accent: "text-violet-300",
+    accent: "text-[#9b1e27]",
   },
 };
 
@@ -454,518 +454,469 @@ export default function UsersPage() {
   }, [users]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-cyan-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-emerald-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            Users
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            Users Management
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Manage platform users, permissions, and access
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#9b1e27] via-[#ff4d6d] to-[#d93f42] px-5 py-2 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+          >
+            <UserPlus className="h-4 w-4" />
+            Create User
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 min-h-screen">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-violet-400">
-                  Superadmin Users
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white">
-                  Users Management
-                </h1>
-              </div>
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                  />
-                  Refresh
-                </button>
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatBox
+          label="Total users"
+          value={loading ? "..." : stats.totalUsers}
+          color="text-[#9b1e27]"
+        />
+        <StatBox
+          label="Admins"
+          value={loading ? "..." : stats.admins}
+          color="text-[#d1661c]"
+        />
+        <StatBox
+          label="Doctors"
+          value={loading ? "..." : stats.doctors}
+          color="text-[#2c8a49]"
+        />
+        <StatBox
+          label="Active"
+          value={loading ? "..." : stats.active}
+          color="text-[#1e5aa8]"
+        />
+      </div>
 
-                <button
-                  onClick={openCreateModal}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 via-fuchsia-500 to-pink-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/20 transition hover:scale-[1.02]"
-                >
-                  <UserPlus className="h-4 w-4" />
-                  Create User
-                </button>
-              </div>
+      {/* Filters */}
+      <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+        <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              placeholder="Search name, email, phone, organization..."
+              className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-5 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            />
+          </div>
+
+          <div className="relative">
+            <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-12 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            >
+              {ROLE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="relative">
+            <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#7c4a5e]" />
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="w-full appearance-none rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] py-4 pl-12 pr-12 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+            >
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} className="bg-white">
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Current view
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {ROLE_OPTIONS.find((o) => o.value === roleFilter)?.label ||
+                "All Roles"}{" "}
+              •{" "}
+              {STATUS_OPTIONS.find((o) => o.value === statusFilter)?.label ||
+                "All Status"}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-xs uppercase tracking-[0.25em] text-[#7c4a5e]">
+              Page
+            </p>
+            <p className="mt-1 font-semibold text-[#31101e]">
+              {page} / {totalPages}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main grid */}
+      <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
+        <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                Platform users
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                All users list
+              </h3>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 rounded-full border border-[#ffe0e8] bg-[#fff7f9] px-4 py-2 text-sm text-[#7c4a5e]">
+              <Users className="h-4 w-4 text-[#1e5aa8]" />
+              {loading ? "Loading..." : `${totalItems} results`}
             </div>
           </div>
-        </header>
 
-        <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
-          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
-            <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
-
-            <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/10 px-4 py-2 text-sm text-violet-300">
-                  <Sparkles className="h-4 w-4" />
-                  Manage platform users, permissions, and access
+          <div className="mt-6 space-y-4">
+            {loading ? (
+              Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-3">
+                      <div className="h-4 w-56 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-44 rounded bg-[#ffe0e8]" />
+                      <div className="h-3 w-32 rounded bg-[#ffe0e8]" />
+                    </div>
+                    <div className="h-10 w-32 rounded-2xl bg-[#ffe0e8]" />
+                  </div>
                 </div>
+              ))
+            ) : users.length > 0 ? (
+              users.map((user) => {
+                const id = user._id || user.id;
+                const isActive =
+                  selectedUser && (selectedUser._id || selectedUser.id) === id;
 
-                <h2 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                  Search, filter, edit, suspend, and delete users securely
-                </h2>
+                const role = String(user.role || "").toUpperCase();
+                const meta = roleMeta[role] || {
+                  icon: Users,
+                  accent: "text-[#7c4a5e]",
+                };
+                const RoleIcon = meta.icon;
 
-                <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                  Use this control panel to manage doctors, staff, admins, and
-                  other platform users with a structured workflow and safe
-                  action handling.
+                return (
+                  <div
+                    key={id}
+                    className={`rounded-2xl border p-5 transition cursor-pointer ${
+                      isActive
+                        ? "border-[#ff4d6d] bg-[#fff0f3]"
+                        : "border-[#ffe0e8] bg-[#fff7f9] hover:border-[#ff4d6d] hover:shadow-md"
+                    }`}
+                    onClick={() => openDetails(user)}
+                  >
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#fff7f9]">
+                          <RoleIcon className={`h-6 w-6 ${meta.accent}`} />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-3">
+                            <h4 className="text-lg font-semibold text-[#31101e]">
+                              {user.name || "User"}
+                            </h4>
+                            <span className="rounded-full border border-[#f2c8c8] bg-white/80 px-3 py-1 text-xs font-semibold text-[#7c4a5e]">
+                              {normalizeRoleLabel(role)}
+                            </span>
+                            <span
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(user.status)}`}
+                            >
+                              {normalizeStatusLabel(user.status)}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-[#7c4a5e]">
+                            <span className="inline-flex items-center gap-2">
+                              <Mail className="h-4 w-4" />
+                              {user.email || "-"}
+                            </span>
+                            <span className="inline-flex items-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              {user.phone || "-"}
+                            </span>
+                            <span className="inline-flex items-center gap-2">
+                              <Hash className="h-4 w-4" />
+                              {user.organizationCode || "-"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDetails(user);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openEditModal(user);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#1e5aa8] to-[#6fb1ff] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                          Edit
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openStatusModal(user);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#d1661c] to-[#f2994a] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                        >
+                          <Ban className="h-4 w-4" />
+                          Status
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteModal(user);
+                          }}
+                          className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-[#d93f42] to-[#f08a8d] px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:shadow-lg"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-10 text-center">
+                <Users className="mx-auto h-12 w-12 text-[#a44255]" />
+                <h4 className="mt-4 text-xl font-semibold text-[#31101e]">
+                  No users found
+                </h4>
+                <p className="mt-2 text-[#7c4a5e]">
+                  Try changing the search, role filter, or status filter.
                 </p>
               </div>
+            )}
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <StatBox
-                  label="Total users"
-                  value={loading ? "..." : stats.totalUsers}
-                  color="text-violet-300"
-                />
-                <StatBox
-                  label="Admins"
-                  value={loading ? "..." : stats.admins}
-                  color="text-amber-300"
-                />
-                <StatBox
-                  label="Doctors"
-                  value={loading ? "..." : stats.doctors}
-                  color="text-emerald-300"
-                />
-                <StatBox
-                  label="Active"
-                  value={loading ? "..." : stats.active}
-                  color="text-cyan-300"
-                />
+          {!loading && totalPages > 1 && (
+            <div className="mt-6 flex items-center justify-between gap-3 border-t border-[#ffe0e8] pt-6">
+              <p className="text-sm text-[#7c4a5e]">
+                Showing page {page} of {totalPages}
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Prev
+                </button>
+
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  const start = Math.max(1, Math.min(page - 2, totalPages - 4));
+                  const current = start + i;
+                  if (current > totalPages) return null;
+                  const active = current === page;
+                  return (
+                    <button
+                      key={current}
+                      onClick={() => setPage(current)}
+                      className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
+                        active
+                          ? "border-[#ff4d6d] bg-[#fff0f3] text-[#ff4d6d]"
+                          : "border-[#ffe0e8] bg-white/80 text-[#31101e] hover:bg-white"
+                      }`}
+                    >
+                      {current}
+                    </button>
+                  );
+                })}
+
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="inline-flex items-center gap-2 rounded-2xl border border-[#f2c8c8] bg-white/80 px-4 py-3 text-sm font-semibold text-[#ff4d6d] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </button>
               </div>
             </div>
-          </section>
-
-          {error && (
-            <div className="mt-6 rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-              {error}
-            </div>
           )}
+        </div>
 
-          <section className="mt-8 grid gap-4 lg:grid-cols-[1fr_auto]">
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
-              <div className="grid gap-4 md:grid-cols-[1fr_auto_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
-                    }}
-                    placeholder="Search name, email, phone, organization..."
-                    className="w-full rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-5 text-white placeholder:text-gray-500 outline-none transition focus:border-violet-500 focus:bg-white/10"
+        <aside className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                User profile
+              </p>
+              <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                {selectedDetails ? "Details" : "Select a user"}
+              </h3>
+            </div>
+
+            {selectedUser && (
+              <button
+                onClick={closeDetails}
+                className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-3 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="mt-6">
+            {!selectedUser ? (
+              <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-8 text-center">
+                <Users className="mx-auto h-12 w-12 text-[#a44255]" />
+                <p className="mt-4 text-[#7c4a5e]">
+                  Click a user to inspect profile details.
+                </p>
+              </div>
+            ) : detailsLoading ? (
+              <div className="space-y-4">
+                {Array.from({ length: 6 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-4 w-40 rounded bg-[#ffe0e8]" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#fff7f9]">
+                      <UserCog className="h-7 w-7 text-[#9b1e27]" />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-[#31101e]">
+                        {selectedDetails?.name || "User"}
+                      </h4>
+                      <p className="mt-1 text-sm text-[#7c4a5e]">
+                        {normalizeRoleLabel(selectedDetails?.role)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3">
+                  <InfoRow
+                    icon={Mail}
+                    label="Email"
+                    value={selectedDetails?.email || "-"}
+                  />
+                  <InfoRow
+                    icon={Phone}
+                    label="Phone"
+                    value={selectedDetails?.phone || "-"}
+                  />
+                  <InfoRow
+                    icon={Hash}
+                    label="Organization Code"
+                    value={selectedDetails?.organizationCode || "-"}
+                  />
+                  <InfoRow
+                    icon={Briefcase}
+                    label="Organization"
+                    value={selectedDetails?.organizationName || "-"}
+                  />
+                  <InfoRow
+                    icon={KeyRound}
+                    label="Role"
+                    value={normalizeRoleLabel(selectedDetails?.role)}
+                  />
+                  <InfoRow
+                    icon={CheckCircle2}
+                    label="Status"
+                    value={normalizeStatusLabel(selectedDetails?.status)}
+                    highlight
+                  />
+                  <InfoRow
+                    icon={CalendarDays}
+                    label="Last Login"
+                    value={formatDateTime(selectedDetails?.lastLogin)}
                   />
                 </div>
 
-                <div className="relative">
-                  <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <select
-                    value={roleFilter}
-                    onChange={(e) => {
-                      setRoleFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-12 text-white outline-none transition focus:border-violet-500 focus:bg-white/10"
-                  >
-                    {ROLE_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-slate-950"
-                      >
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="relative">
-                  <Filter className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-500" />
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => {
-                      setStatusFilter(e.target.value);
-                      setPage(1);
-                    }}
-                    className="w-full appearance-none rounded-2xl border border-white/10 bg-slate-950/40 py-4 pl-12 pr-12 text-white outline-none transition focus:border-violet-500 focus:bg-white/10"
-                  >
-                    {STATUS_OPTIONS.map((opt) => (
-                      <option
-                        key={opt.value}
-                        value={opt.value}
-                        className="bg-slate-950"
-                      >
-                        {opt.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-4 flex items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Current view
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {ROLE_OPTIONS.find((o) => o.value === roleFilter)?.label ||
-                    "All Roles"}{" "}
-                  •{" "}
-                  {STATUS_OPTIONS.find((o) => o.value === statusFilter)
-                    ?.label || "All Status"}
-                </p>
-              </div>
-
-              <div className="text-right">
-                <p className="text-xs uppercase tracking-[0.25em] text-gray-400">
-                  Page
-                </p>
-                <p className="mt-1 font-semibold text-white">
-                  {page} / {totalPages}
-                </p>
-              </div>
-            </div>
-          </section>
-
-          <section className="mt-8 grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-            <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                    Platform users
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                  <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                    Notes
                   </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    All users list
-                  </h3>
-                </div>
-
-                <div className="hidden md:flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/40 px-4 py-2 text-sm text-gray-300">
-                  <Users className="h-4 w-4 text-cyan-300" />
-                  {loading ? "Loading..." : `${totalItems} results`}
-                </div>
-              </div>
-
-              <div className="mt-6 space-y-4">
-                {loading ? (
-                  Array.from({ length: 6 }).map((_, idx) => (
-                    <div
-                      key={idx}
-                      className="animate-pulse rounded-[26px] border border-white/10 bg-slate-950/40 p-5"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-3">
-                          <div className="h-4 w-56 rounded bg-white/10" />
-                          <div className="h-3 w-44 rounded bg-white/10" />
-                          <div className="h-3 w-32 rounded bg-white/10" />
-                        </div>
-                        <div className="h-10 w-32 rounded-2xl bg-white/10" />
-                      </div>
-                    </div>
-                  ))
-                ) : users.length > 0 ? (
-                  users.map((user) => {
-                    const id = user._id || user.id;
-                    const isActive =
-                      selectedUser &&
-                      (selectedUser._id || selectedUser.id) === id;
-
-                    const role = String(user.role || "").toUpperCase();
-                    const meta = roleMeta[role] || {
-                      icon: Users,
-                      accent: "text-gray-300",
-                    };
-                    const RoleIcon = meta.icon;
-
-                    return (
-                      <div
-                        key={id}
-                        className={`rounded-[26px] border p-5 transition cursor-pointer ${
-                          isActive
-                            ? "border-violet-500/40 bg-violet-500/10"
-                            : "border-white/10 bg-slate-950/40 hover:border-white/20"
-                        }`}
-                        onClick={() => openDetails(user)}
-                      >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                              <RoleIcon className={`h-6 w-6 ${meta.accent}`} />
-                            </div>
-
-                            <div className="space-y-2">
-                              <div className="flex flex-wrap items-center gap-3">
-                                <h4 className="text-lg font-bold text-white">
-                                  {user.name || "User"}
-                                </h4>
-                                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-gray-300">
-                                  {normalizeRoleLabel(role)}
-                                </span>
-                                <span
-                                  className={`rounded-full border px-3 py-1 text-xs ${getStatusStyle(user.status)}`}
-                                >
-                                  {normalizeStatusLabel(user.status)}
-                                </span>
-                              </div>
-
-                              <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-gray-400">
-                                <span className="inline-flex items-center gap-2">
-                                  <Mail className="h-4 w-4" />
-                                  {user.email || "-"}
-                                </span>
-                                <span className="inline-flex items-center gap-2">
-                                  <Phone className="h-4 w-4" />
-                                  {user.phone || "-"}
-                                </span>
-                                <span className="inline-flex items-center gap-2">
-                                  <Hash className="h-4 w-4" />
-                                  {user.organizationCode || "-"}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap gap-3">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDetails(user);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openEditModal(user);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-4 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                              Edit
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openStatusModal(user);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                            >
-                              <Ban className="h-4 w-4" />
-                              Status
-                            </button>
-
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDeleteModal(user);
-                              }}
-                              className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 px-4 py-3 text-sm font-semibold text-white transition hover:scale-[1.02]"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-10 text-center">
-                    <Users className="mx-auto h-12 w-12 text-gray-500" />
-                    <h4 className="mt-4 text-xl font-bold text-white">
-                      No users found
-                    </h4>
-                    <p className="mt-2 text-gray-400">
-                      Try changing the search, role filter, or status filter.
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {!loading && totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-white/10 pt-6">
-                  <p className="text-sm text-gray-400">
-                    Showing page {page} of {totalPages}
+                  <p className="mt-3 text-sm leading-relaxed text-[#7c4a5e]">
+                    Use Edit to update profile information, Status to activate
+                    or suspend access, and Delete for permanent removal.
                   </p>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      disabled={page <= 1}
-                      onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Prev
-                    </button>
-
-                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                      const start = Math.max(
-                        1,
-                        Math.min(page - 2, totalPages - 4),
-                      );
-                      const current = start + i;
-                      if (current > totalPages) return null;
-                      const active = current === page;
-                      return (
-                        <button
-                          key={current}
-                          onClick={() => setPage(current)}
-                          className={`h-12 w-12 rounded-2xl border text-sm font-semibold transition ${
-                            active
-                              ? "border-violet-500/30 bg-violet-500/15 text-violet-300"
-                              : "border-white/10 bg-white/5 text-white hover:bg-white/10"
-                          }`}
-                        >
-                          {current}
-                        </button>
-                      );
-                    })}
-
-                    <button
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
-                  </div>
                 </div>
-              )}
-            </div>
-
-            <aside className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                    User profile
-                  </p>
-                  <h3 className="mt-2 text-2xl font-black text-white">
-                    {selectedDetails ? "Details" : "Select a user"}
-                  </h3>
-                </div>
-
-                {selectedUser && (
-                  <button
-                    onClick={closeDetails}
-                    className="rounded-2xl border border-white/10 bg-white/5 p-3 text-gray-300 transition hover:bg-white/10 hover:text-white"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
               </div>
-
-              <div className="mt-6">
-                {!selectedUser ? (
-                  <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-8 text-center">
-                    <Users className="mx-auto h-12 w-12 text-gray-500" />
-                    <p className="mt-4 text-gray-400">
-                      Click a user to inspect profile details.
-                    </p>
-                  </div>
-                ) : detailsLoading ? (
-                  <div className="space-y-4">
-                    {Array.from({ length: 6 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                      >
-                        <div className="h-3 w-24 rounded bg-white/10" />
-                        <div className="mt-2 h-4 w-40 rounded bg-white/10" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                      <div className="flex items-center gap-4">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-500/15">
-                          <UserCog className="h-7 w-7 text-violet-300" />
-                        </div>
-                        <div>
-                          <h4 className="text-xl font-bold text-white">
-                            {selectedDetails?.name || "User"}
-                          </h4>
-                          <p className="mt-1 text-sm text-gray-400">
-                            {normalizeRoleLabel(selectedDetails?.role)}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid gap-3">
-                      <InfoRow
-                        icon={Mail}
-                        label="Email"
-                        value={selectedDetails?.email || "-"}
-                      />
-                      <InfoRow
-                        icon={Phone}
-                        label="Phone"
-                        value={selectedDetails?.phone || "-"}
-                      />
-                      <InfoRow
-                        icon={Hash}
-                        label="Organization Code"
-                        value={selectedDetails?.organizationCode || "-"}
-                      />
-                      <InfoRow
-                        icon={Briefcase}
-                        label="Organization"
-                        value={selectedDetails?.organizationName || "-"}
-                      />
-                      <InfoRow
-                        icon={KeyRound}
-                        label="Role"
-                        value={normalizeRoleLabel(selectedDetails?.role)}
-                      />
-                      <InfoRow
-                        icon={CheckCircle2}
-                        label="Status"
-                        value={normalizeStatusLabel(selectedDetails?.status)}
-                        highlight
-                      />
-                      <InfoRow
-                        icon={CalendarDays}
-                        label="Last Login"
-                        value={formatDateTime(selectedDetails?.lastLogin)}
-                      />
-                    </div>
-
-                    <div className="rounded-[28px] border border-white/10 bg-white/5 p-5">
-                      <p className="text-sm uppercase tracking-[0.2em] text-gray-400">
-                        Notes
-                      </p>
-                      <p className="mt-3 text-sm leading-relaxed text-gray-300">
-                        Use Edit to update profile information, Status to
-                        activate or suspend access, and Delete for permanent
-                        removal.
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </aside>
-          </section>
-        </main>
+            )}
+          </div>
+        </aside>
       </div>
 
       {showCreateModal && (
@@ -981,7 +932,7 @@ export default function UsersPage() {
           }}
           onConfirm={handleCreate}
           confirmLabel={processing ? "Creating..." : "Create"}
-          accent="from-violet-500 via-fuchsia-500 to-pink-500"
+          accent="from-[#9b1e27] via-[#ff4d6d] to-[#d93f42]"
           loading={processing}
           mode="create"
         />
@@ -1001,7 +952,7 @@ export default function UsersPage() {
           }}
           onConfirm={handleEdit}
           confirmLabel={processing ? "Saving..." : "Save changes"}
-          accent="from-cyan-500 to-blue-500"
+          accent="from-[#1e5aa8] to-[#6fb1ff]"
           loading={processing}
           mode="edit"
         />
@@ -1020,7 +971,7 @@ export default function UsersPage() {
           }}
           onConfirm={handleStatusUpdate}
           confirmLabel={processing ? "Updating..." : "Update status"}
-          accent="from-amber-500 to-orange-500"
+          accent="from-[#d1661c] to-[#f2994a]"
           loading={processing}
         />
       )}
@@ -1042,37 +993,37 @@ export default function UsersPage() {
           loading={processing}
         />
       )}
-    </div>
+    </section>
   );
 }
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${color}`}>{value}</p>
-      <p className="mt-1 text-xs text-gray-500">Users</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+      <p className="text-xs text-[#7c4a5e]">{label}</p>
+      <p className={`mt-2 text-3xl font-semibold ${color}`}>{value}</p>
+      <p className="mt-1 text-xs text-[#a44255]">Users</p>
     </div>
   );
 }
 
 function InfoRow({ icon: Icon, label, value, highlight = false }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
       <div className="flex items-start gap-3">
         <div
-          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-violet-500/15" : "bg-white/10"}`}
+          className={`mt-0.5 rounded-xl p-2 ${highlight ? "bg-[#fff7f9]" : "bg-[#ffe0e8]"}`}
         >
           <Icon
-            className={`h-4 w-4 ${highlight ? "text-violet-300" : "text-gray-300"}`}
+            className={`h-4 w-4 ${highlight ? "text-[#ff4d6d]" : "text-[#7c4a5e]"}`}
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+          <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
             {label}
           </p>
           <p
-            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-violet-300" : "text-white"}`}
+            className={`mt-1 break-words text-sm font-semibold ${highlight ? "text-[#ff4d6d]" : "text-[#31101e]"}`}
           >
             {value || "-"}
           </p>
@@ -1095,8 +1046,8 @@ function UserFormModal({
   mode = "create",
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-2xl rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-2xl rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
           <div
             className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}
@@ -1109,15 +1060,15 @@ function UserFormModal({
           </div>
 
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
@@ -1195,11 +1146,11 @@ function UserFormModal({
             />
           )}
           {mode === "edit" && (
-            <div className="md:col-span-2 rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+            <div className="md:col-span-2 rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
                 Password
               </p>
-              <p className="mt-2 text-sm text-gray-300">
+              <p className="mt-2 text-sm text-[#7c4a5e]">
                 Leave empty to keep the existing password unchanged.
               </p>
               <input
@@ -1208,7 +1159,7 @@ function UserFormModal({
                 value={formData.password}
                 onChange={handleChange}
                 placeholder="New password (optional)"
-                className="mt-3 w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-violet-500 focus:bg-white/10"
+                className="mt-3 w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
               />
             </div>
           )}
@@ -1217,14 +1168,14 @@ function UserFormModal({
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60`}
+            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {confirmLabel}
           </button>
@@ -1246,8 +1197,8 @@ function StatusModal({
   loading,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
           <div
             className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br ${accent}`}
@@ -1256,37 +1207,37 @@ function StatusModal({
           </div>
 
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
         <div className="mt-6">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
             New Status
           </label>
           <select
             name="status"
             value={formData.status}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white outline-none transition focus:border-amber-500 focus:bg-white/10"
+            className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] outline-none transition focus:border-[#d1661c] focus:bg-white"
           >
-            <option value="ACTIVE" className="bg-slate-950">
+            <option value="ACTIVE" className="bg-white">
               ACTIVE
             </option>
-            <option value="INACTIVE" className="bg-slate-950">
+            <option value="INACTIVE" className="bg-white">
               INACTIVE
             </option>
-            <option value="SUSPENDED" className="bg-slate-950">
+            <option value="SUSPENDED" className="bg-white">
               SUSPENDED
             </option>
           </select>
@@ -1295,14 +1246,14 @@ function StatusModal({
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60`}
+            className={`flex-1 rounded-2xl bg-gradient-to-r ${accent} px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {confirmLabel}
           </button>
@@ -1323,60 +1274,110 @@ function DeleteModal({
   loading,
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-lg rounded-[32px] border border-white/10 bg-[#09111f] p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+      <div className="w-full max-w-lg rounded-3xl border border-[#ffe0e8] bg-white p-6 sm:p-8 shadow-2xl">
         <div className="flex items-start gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-red-500">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#d93f42] to-[#f08a8d]">
             <Trash2 className="h-7 w-7 text-white" />
           </div>
 
           <div className="flex-1">
-            <h3 className="text-2xl font-black text-white">{title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-gray-400">
+            <h3 className="text-2xl font-semibold text-[#31101e]">{title}</h3>
+            <p className="mt-2 text-sm leading-relaxed text-[#7c4a5e]">
               {description}
             </p>
           </div>
 
           <button
             onClick={onClose}
-            className="rounded-2xl border border-white/10 bg-white/5 p-2 text-gray-300 transition hover:bg-white/10 hover:text-white"
+            className="rounded-2xl border border-[#f2c8c8] bg-white/80 p-2 text-[#7c4a5e] transition hover:bg-white hover:text-[#31101e]"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-100">
+        <div className="mt-6 rounded-2xl border border-red-300 bg-red-50 p-4 text-sm text-red-800">
           Type <strong>{targetName}</strong> to confirm permanent deletion.
         </div>
 
         <div className="mt-5">
-          <label className="mb-2 block text-sm font-medium text-gray-300">
+          <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
             Confirmation text
           </label>
           <input
             value={confirmText}
             onChange={(e) => setConfirmText(e.target.value)}
             placeholder={targetName}
-            className="w-full rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-white placeholder:text-gray-500 outline-none transition focus:border-rose-500 focus:bg-white/10"
+            className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#d93f42] focus:bg-white"
           />
         </div>
 
         <div className="mt-8 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-2xl border border-white/10 bg-white/5 px-5 py-4 font-semibold text-white transition hover:bg-white/10"
+            className="flex-1 rounded-2xl border border-[#f2c8c8] bg-white/80 px-5 py-4 font-semibold text-[#ff4d6d] transition hover:bg-white"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex-1 rounded-2xl bg-gradient-to-r from-rose-500 to-red-500 px-5 py-4 font-bold text-white transition hover:scale-[1.02] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex-1 rounded-2xl bg-gradient-to-r from-[#d93f42] to-[#f08a8d] px-5 py-4 font-bold text-white transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading ? "Deleting..." : "Delete"}
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  as = "input",
+  options = [],
+  type = "text",
+  className = "",
+}) {
+  if (as === "select") {
+    return (
+      <div className={className}>
+        <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
+          {label}
+        </label>
+        <select
+          name={name}
+          value={value}
+          onChange={onChange}
+          className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+        >
+          {options.map((opt) => (
+            <option key={opt} value={opt} className="bg-white">
+              {opt}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
+
+  return (
+    <div className={className}>
+      <label className="mb-2 block text-sm font-medium text-[#7c4a5e]">
+        {label}
+      </label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] px-5 py-4 text-[#31101e] placeholder:text-[#a44255] outline-none transition focus:border-[#ff4d6d] focus:bg-white"
+      />
     </div>
   );
 }

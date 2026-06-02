@@ -70,18 +70,18 @@ const getStatusStyle = (status) => {
     case "OK":
     case "RUNNING":
     case "ACTIVE":
-      return "bg-emerald-500/10 border-emerald-500/20 text-emerald-300";
+      return "bg-emerald-100 border-emerald-300 text-emerald-700";
     case "DEGRADED":
     case "WARNING":
     case "MONITORING":
-      return "bg-amber-500/10 border-amber-500/20 text-amber-300";
+      return "bg-amber-100 border-amber-300 text-amber-700";
     case "DOWN":
     case "ERROR":
     case "FAILED":
     case "OFFLINE":
-      return "bg-rose-500/10 border-rose-500/20 text-rose-300";
+      return "bg-red-100 border-red-300 text-red-700";
     default:
-      return "bg-slate-500/10 border-slate-500/20 text-slate-300";
+      return "bg-gray-100 border-gray-300 text-gray-700";
   }
 };
 
@@ -334,593 +334,537 @@ export default function SystemHealth() {
   }, [metrics]);
 
   return (
-    <div className="min-h-screen overflow-hidden bg-[#050816] text-white relative">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 h-[420px] w-[420px] rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute top-24 right-0 h-[420px] w-[420px] rounded-full bg-emerald-500/15 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-violet-500/10 blur-3xl" />
+    <section className="space-y-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.4em] text-[#ff4d6d]">
+            System Health
+          </p>
+          <h3 className="text-3xl font-semibold text-[#31101e]">
+            System Health Monitoring
+          </h3>
+          <p className="text-sm text-[#7c4a5e]">
+            Monitor database, APIs, collections, and errors
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={handleExportErrors}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <Download className="h-4 w-4" />
+            Export Errors
+          </button>
+
+          <button
+            onClick={handleRefresh}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={() => navigate("/superadmin/dashboard/overview")}
+            className="inline-flex items-center gap-2 rounded-full border border-[#f2c8c8] bg-white/80 px-4 py-2 text-sm font-semibold text-[#ff4d6d] shadow-[0_10px_25px_rgba(255,77,109,0.15)] hover:shadow-[0_15px_35px_rgba(255,77,109,0.25)] transition-all"
+          >
+            Dashboard
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 min-h-screen">
-        <header className="sticky top-0 z-40 border-b border-white/10 bg-slate-950/70 backdrop-blur-xl">
-          <div className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8">
-            <div className="flex h-20 items-center justify-between gap-4">
-              <div>
-                <p className="text-xs uppercase tracking-[0.35em] text-cyan-400">
-                  Superadmin System
-                </p>
-                <h1 className="text-xl sm:text-2xl font-black text-white">
-                  System Health
-                </h1>
+      {error && (
+        <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-800">
+          {error}
+        </div>
+      )}
+
+      {/* Stats */}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <StatBox
+          label="Healthy"
+          value={loading ? "..." : statusSummary.healthy}
+          color="text-[#2c8a49]"
+        />
+        <StatBox
+          label="Warnings"
+          value={loading ? "..." : statusSummary.warning}
+          color="text-[#d1661c]"
+        />
+        <StatBox
+          label="Down"
+          value={loading ? "..." : statusSummary.down}
+          color="text-[#d93f42]"
+        />
+        <StatBox
+          label="Collections"
+          value={loading ? "..." : collectionTotal}
+          color="text-[#1e5aa8]"
+        />
+      </div>
+
+      {/* Main grid */}
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* Database + Collections */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                    Database
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                    Connection status
+                  </h3>
+                </div>
+                <Database className="h-6 w-6 text-[#1e5aa8]" />
               </div>
 
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleExportErrors}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <Download className="h-4 w-4" />
-                  Export Errors
-                </button>
+              <div className="mt-6 space-y-4">
+                {loading ? (
+                  Array.from({ length: 3 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="h-3 w-28 rounded bg-[#ffe0e8]" />
+                      <div className="mt-2 h-4 w-40 rounded bg-[#ffe0e8]" />
+                    </div>
+                  ))
+                ) : safeArray(healthChecks).length > 0 ? (
+                  safeArray(healthChecks).map((item, idx) => {
+                    const StatusIcon = getStatusIcon(item.status || item.state);
+                    return (
+                      <div
+                        key={item._id || item.id || idx}
+                        className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div>
+                            <p className="font-semibold text-[#31101e]">
+                              {item.name ||
+                                item.service ||
+                                item.label ||
+                                "Service"}
+                            </p>
+                            <p className="mt-1 text-sm text-[#7c4a5e]">
+                              {item.details || item.message || "Status check"}
+                            </p>
+                          </div>
 
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
-                  />
-                  Refresh
-                </button>
+                          <span
+                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(
+                              item.status || item.state,
+                            )}`}
+                          >
+                            <StatusIcon className="h-3.5 w-3.5" />
+                            {normalizeStatus(item.status || item.state)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                    No database health data found.
+                  </div>
+                )}
+              </div>
+            </div>
 
-                <button
-                  onClick={() => navigate("/superadmin/dashboard")}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-gray-300 transition hover:bg-white/10 hover:text-white"
-                >
-                  Dashboard
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+            <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.4em] text-[#2c8a49]">
+                    Collections
+                  </p>
+                  <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                    Document counts
+                  </h3>
+                </div>
+                <Layers3 className="h-6 w-6 text-[#2c8a49]" />
+              </div>
+
+              <div className="mt-6 space-y-4">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                      <div className="mt-2 h-4 w-32 rounded bg-[#ffe0e8]" />
+                    </div>
+                  ))
+                ) : safeArray(collections).length > 0 ? (
+                  safeArray(collections).map((item, idx) => (
+                    <div
+                      key={item._id || item.id || idx}
+                      className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="font-semibold text-[#31101e]">
+                            {item.name ||
+                              item.collection ||
+                              item.label ||
+                              "Collection"}
+                          </p>
+                          <p className="mt-1 text-sm text-[#7c4a5e]">
+                            {item.description ||
+                              item.details ||
+                              "Document total"}
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-2xl font-semibold text-[#31101e]">
+                            {formatNumber(
+                              item.count ?? item.documents ?? item.total ?? 0,
+                            )}
+                          </p>
+                          <p className="text-xs text-[#a44255]">docs</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                    No collection counts available.
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </header>
 
-        <main className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6 lg:px-8 lg:py-10 space-y-8">
-          {/* Hero */}
-          <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 p-8 lg:p-10">
-            <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-            <div className="absolute left-0 bottom-0 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
-
-            <div className="relative z-10 grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+          {/* Metrics */}
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between gap-4">
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/10 px-4 py-2 text-sm text-cyan-300">
-                  <Sparkles className="h-4 w-4" />
-                  Monitor database, APIs, collections, and errors
-                </div>
-
-                <h2 className="mt-6 text-4xl sm:text-5xl font-black leading-tight text-white">
-                  Keep the platform healthy with live operational visibility
-                </h2>
-
-                <p className="mt-4 max-w-3xl text-gray-400 leading-relaxed">
-                  Review database status, collection counts, service checks,
-                  system metrics, and error logs from a centralized control
-                  panel.
+                <p className="text-xs uppercase tracking-[0.4em] text-[#9b1e27]">
+                  System metrics
                 </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Live performance
+                </h3>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <StatBox
-                  label="Healthy"
-                  value={loading ? "..." : statusSummary.healthy}
-                  color="text-emerald-300"
-                />
-                <StatBox
-                  label="Warnings"
-                  value={loading ? "..." : statusSummary.warning}
-                  color="text-amber-300"
-                />
-                <StatBox
-                  label="Down"
-                  value={loading ? "..." : statusSummary.down}
-                  color="text-rose-300"
-                />
-                <StatBox
-                  label="Collections"
-                  value={loading ? "..." : collectionTotal}
-                  color="text-cyan-300"
-                />
-              </div>
+              <BarChart3 className="h-6 w-6 text-[#9b1e27]" />
             </div>
-          </section>
 
-          {error && (
-            <div className="rounded-[28px] border border-amber-500/20 bg-amber-500/10 p-4 text-amber-200">
-              {error}
-            </div>
-          )}
+            <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {loading ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                  >
+                    <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                    <div className="mt-4 h-8 w-20 rounded bg-[#ffe0e8]" />
+                    <div className="mt-3 h-2 rounded-full bg-[#ffe0e8]" />
+                  </div>
+                ))
+              ) : metricsList.length > 0 ? (
+                metricsList.map((item, idx) => {
+                  const numeric = Number(item.value ?? 0) || 0;
+                  const max = item.label.toLowerCase().includes("memory")
+                    ? 100
+                    : item.label.toLowerCase().includes("cpu")
+                      ? 100
+                      : item.label.toLowerCase().includes("response")
+                        ? 1000
+                        : Math.max(100, numeric || 100);
 
-          {/* Main grid */}
-          <section className="grid gap-6 xl:grid-cols-[1.25fr_0.75fr]">
-            {/* Left column */}
-            <div className="space-y-6">
-              {/* Database + Collections */}
-              <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                        Database
+                  const pct = Math.min(100, (numeric / max) * 100);
+                  return (
+                    <div
+                      key={item.label || idx}
+                      className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5"
+                    >
+                      <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                        {item.label || "Metric"}
                       </p>
-                      <h3 className="mt-2 text-2xl font-black text-white">
-                        Connection status
-                      </h3>
-                    </div>
-                    <Database className="h-6 w-6 text-cyan-300" />
-                  </div>
-
-                  <div className="mt-6 space-y-4">
-                    {loading ? (
-                      Array.from({ length: 3 }).map((_, idx) => (
-                        <div
-                          key={idx}
-                          className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="h-3 w-28 rounded bg-white/10" />
-                          <div className="mt-2 h-4 w-40 rounded bg-white/10" />
-                        </div>
-                      ))
-                    ) : safeArray(healthChecks).length > 0 ? (
-                      safeArray(healthChecks).map((item, idx) => {
-                        const StatusIcon = getStatusIcon(
-                          item.status || item.state,
-                        );
-                        return (
-                          <div
-                            key={item._id || item.id || idx}
-                            className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                          >
-                            <div className="flex items-center justify-between gap-3">
-                              <div>
-                                <p className="font-semibold text-white">
-                                  {item.name ||
-                                    item.service ||
-                                    item.label ||
-                                    "Service"}
-                                </p>
-                                <p className="mt-1 text-sm text-gray-400">
-                                  {item.details ||
-                                    item.message ||
-                                    "Status check"}
-                                </p>
-                              </div>
-
-                              <span
-                                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold ${getStatusStyle(
-                                  item.status || item.state,
-                                )}`}
-                              >
-                                <StatusIcon className="h-3.5 w-3.5" />
-                                {normalizeStatus(item.status || item.state)}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                        No database health data found.
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.25em] text-emerald-400">
-                        Collections
+                      <p className="mt-3 text-3xl font-semibold text-[#31101e]">
+                        {formatNumber(item.value)}
+                        {item.unit || ""}
                       </p>
-                      <h3 className="mt-2 text-2xl font-black text-white">
-                        Document counts
-                      </h3>
-                    </div>
-                    <Layers3 className="h-6 w-6 text-emerald-300" />
-                  </div>
-
-                  <div className="mt-6 space-y-4">
-                    {loading ? (
-                      Array.from({ length: 5 }).map((_, idx) => (
+                      <div className="mt-4 h-2 rounded-full bg-[#ffe0e8]">
                         <div
-                          key={idx}
-                          className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="h-3 w-24 rounded bg-white/10" />
-                          <div className="mt-2 h-4 w-32 rounded bg-white/10" />
-                        </div>
-                      ))
-                    ) : safeArray(collections).length > 0 ? (
-                      safeArray(collections).map((item, idx) => (
-                        <div
-                          key={item._id || item.id || idx}
-                          className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div>
-                              <p className="font-semibold text-white">
-                                {item.name ||
-                                  item.collection ||
-                                  item.label ||
-                                  "Collection"}
-                              </p>
-                              <p className="mt-1 text-sm text-gray-400">
-                                {item.description ||
-                                  item.details ||
-                                  "Document total"}
-                              </p>
-                            </div>
-
-                            <div className="text-right">
-                              <p className="text-2xl font-black text-white">
-                                {formatNumber(
-                                  item.count ??
-                                    item.documents ??
-                                    item.total ??
-                                    0,
-                                )}
-                              </p>
-                              <p className="text-xs text-gray-500">docs</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                        No collection counts available.
+                          className="h-2 rounded-full bg-gradient-to-r from-[#9b1e27] to-[#ff4d6d]"
+                          style={{ width: `${pct}%` }}
+                        />
                       </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Metrics */}
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-violet-400">
-                      System metrics
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Live performance
-                    </h3>
-                  </div>
-                  <BarChart3 className="h-6 w-6 text-violet-300" />
-                </div>
-
-                <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                  {loading ? (
-                    Array.from({ length: 4 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-[26px] border border-white/10 bg-slate-950/40 p-5"
-                      >
-                        <div className="h-3 w-24 rounded bg-white/10" />
-                        <div className="mt-4 h-8 w-20 rounded bg-white/10" />
-                        <div className="mt-3 h-2 rounded-full bg-white/10" />
-                      </div>
-                    ))
-                  ) : metricsList.length > 0 ? (
-                    metricsList.map((item, idx) => {
-                      const numeric = Number(item.value ?? 0) || 0;
-                      const max = item.label.toLowerCase().includes("memory")
-                        ? 100
-                        : item.label.toLowerCase().includes("cpu")
-                          ? 100
-                          : item.label.toLowerCase().includes("response")
-                            ? 1000
-                            : Math.max(100, numeric || 100);
-
-                      const pct = Math.min(100, (numeric / max) * 100);
-                      return (
-                        <div
-                          key={item.label || idx}
-                          className="rounded-[26px] border border-white/10 bg-slate-950/40 p-5"
-                        >
-                          <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
-                            {item.label || "Metric"}
-                          </p>
-                          <p className="mt-3 text-3xl font-black text-white">
-                            {formatNumber(item.value)}
-                            {item.unit || ""}
-                          </p>
-                          <div className="mt-4 h-2 rounded-full bg-white/10">
-                            <div
-                              className="h-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-500"
-                              style={{ width: `${pct}%` }}
-                            />
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <div className="col-span-full rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                      No metrics available.
                     </div>
-                  )}
+                  );
+                })
+              ) : (
+                <div className="col-span-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                  No metrics available.
                 </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <aside className="space-y-6">
+          {/* API Health */}
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#d1661c]">
+                  APIs
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Health checks
+                </h3>
               </div>
+              <ShieldCheck className="h-6 w-6 text-[#2c8a49]" />
             </div>
 
-            {/* Right column */}
-            <aside className="space-y-6">
-              {/* API Health */}
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-amber-400">
-                      APIs
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Health checks
-                    </h3>
+            <div className="mt-6 space-y-4">
+              {loading ? (
+                Array.from({ length: 4 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-3 w-28 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-4 w-36 rounded bg-[#ffe0e8]" />
                   </div>
-                  <ShieldCheck className="h-6 w-6 text-emerald-300" />
-                </div>
-
-                <div className="mt-6 space-y-4">
-                  {loading ? (
-                    Array.from({ length: 4 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                      >
-                        <div className="h-3 w-28 rounded bg-white/10" />
-                        <div className="mt-2 h-4 w-36 rounded bg-white/10" />
-                      </div>
-                    ))
-                  ) : healthChecks.length > 0 ? (
-                    healthChecks.map((item, idx) => {
-                      const StatusIcon = getStatusIcon(
-                        item.status || item.state,
-                      );
-                      return (
-                        <div
-                          key={item._id || item.id || idx}
-                          className="rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="min-w-0">
-                              <p className="font-semibold text-white">
-                                {item.name || item.service || "API"}
-                              </p>
-                              <p className="mt-1 text-sm text-gray-400">
-                                {item.endpoint ||
-                                  item.route ||
-                                  item.details ||
-                                  "Health check"}
-                              </p>
-                            </div>
-
-                            <StatusIcon
-                              className={`h-5 w-5 ${
-                                ["HEALTHY", "OK", "RUNNING", "ACTIVE"].includes(
-                                  normalizeStatus(item.status || item.state),
-                                )
-                                  ? "text-emerald-300"
-                                  : [
-                                        "DEGRADED",
-                                        "WARNING",
-                                        "MONITORING",
-                                      ].includes(
-                                        normalizeStatus(
-                                          item.status || item.state,
-                                        ),
-                                      )
-                                    ? "text-amber-300"
-                                    : "text-rose-300"
-                              }`}
-                            />
-                          </div>
+                ))
+              ) : healthChecks.length > 0 ? (
+                healthChecks.map((item, idx) => {
+                  const StatusIcon = getStatusIcon(item.status || item.state);
+                  return (
+                    <div
+                      key={item._id || item.id || idx}
+                      className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-[#31101e]">
+                            {item.name || item.service || "API"}
+                          </p>
+                          <p className="mt-1 text-sm text-[#7c4a5e]">
+                            {item.endpoint ||
+                              item.route ||
+                              item.details ||
+                              "Health check"}
+                          </p>
                         </div>
-                      );
-                    })
-                  ) : (
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                      No API checks available.
+
+                        <StatusIcon
+                          className={`h-5 w-5 ${
+                            ["HEALTHY", "OK", "RUNNING", "ACTIVE"].includes(
+                              normalizeStatus(item.status || item.state),
+                            )
+                              ? "text-[#2c8a49]"
+                              : ["DEGRADED", "WARNING", "MONITORING"].includes(
+                                    normalizeStatus(item.status || item.state),
+                                  )
+                                ? "text-[#d1661c]"
+                                : "text-[#d93f42]"
+                          }`}
+                        />
+                      </div>
                     </div>
-                  )}
+                  );
+                })
+              ) : (
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                  No API checks available.
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Error logs */}
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#d93f42]">
+                  Errors
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Error logs
+                </h3>
               </div>
+              <AlertTriangle className="h-6 w-6 text-[#d93f42]" />
+            </div>
 
-              {/* Error logs */}
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-rose-400">
-                      Errors
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Error logs
-                    </h3>
+            <div className="mt-6 space-y-4">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <div
+                    key={idx}
+                    className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                  >
+                    <div className="h-3 w-24 rounded bg-[#ffe0e8]" />
+                    <div className="mt-2 h-4 w-44 rounded bg-[#ffe0e8]" />
                   </div>
-                  <AlertTriangle className="h-6 w-6 text-rose-300" />
-                </div>
+                ))
+              ) : errorLogs.length > 0 ? (
+                errorLogs.map((log) => (
+                  <button
+                    key={log._id || log.id}
+                    onClick={async () => {
+                      setSelectedError(log);
+                      if (!log?._id && !log?.id) return;
 
-                <div className="mt-6 space-y-4">
-                  {loading ? (
-                    Array.from({ length: 5 }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                      >
-                        <div className="h-3 w-24 rounded bg-white/10" />
-                        <div className="mt-2 h-4 w-44 rounded bg-white/10" />
-                      </div>
-                    ))
-                  ) : errorLogs.length > 0 ? (
-                    errorLogs.map((log) => (
-                      <button
-                        key={log._id || log.id}
-                        onClick={async () => {
-                          setSelectedError(log);
-                          if (!log?._id && !log?.id) return;
-
-                          const id = log._id || log.id;
-                          setDetailsLoading(true);
-                          try {
-                            const res = await api.get(
-                              ENDPOINTS.errorDetails(id),
-                            );
-                            const payload = res.data?.data || res.data || {};
-                            setSelectedError(
-                              payload.error || payload.data || payload || log,
-                            );
-                          } catch (err) {
-                            toast.error(
-                              err.response?.data?.message ||
-                                "Failed to load error details",
-                            );
-                          } finally {
-                            setDetailsLoading(false);
-                          }
-                        }}
-                        className="w-full rounded-2xl border border-white/10 bg-slate-950/40 p-4 text-left transition hover:bg-white/10"
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-white">
-                              {log.message || log.error || "Error"}
-                            </p>
-                            <p className="mt-1 text-sm text-gray-400">
-                              {formatDateTime(
-                                log.createdAt || log.timestamp || log.date,
-                              )}
-                            </p>
-                          </div>
-
-                          <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-3 py-1 text-xs text-rose-300">
-                            {log.level || "error"}
-                          </span>
-                        </div>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                      No error logs found.
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Selected error detail */}
-              <div className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-                <div className="flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.25em] text-cyan-400">
-                      Selected log
-                    </p>
-                    <h3 className="mt-2 text-2xl font-black text-white">
-                      Details
-                    </h3>
-                  </div>
-                  <Eye className="h-6 w-6 text-cyan-300" />
-                </div>
-
-                <div className="mt-6">
-                  {!selectedError ? (
-                    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-6 text-center text-gray-400">
-                      Click an error log to inspect details.
-                    </div>
-                  ) : detailsLoading ? (
-                    <div className="space-y-3">
-                      {Array.from({ length: 4 }).map((_, idx) => (
-                        <div
-                          key={idx}
-                          className="animate-pulse rounded-2xl border border-white/10 bg-slate-950/40 p-4"
-                        >
-                          <div className="h-3 w-28 rounded bg-white/10" />
-                          <div className="mt-2 h-4 w-full rounded bg-white/10" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="rounded-[28px] border border-white/10 bg-slate-950/40 p-5">
-                        <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
-                          Message
+                      const id = log._id || log.id;
+                      setDetailsLoading(true);
+                      try {
+                        const res = await api.get(ENDPOINTS.errorDetails(id));
+                        const payload = res.data?.data || res.data || {};
+                        setSelectedError(
+                          payload.error || payload.data || payload || log,
+                        );
+                      } catch (err) {
+                        toast.error(
+                          err.response?.data?.message ||
+                            "Failed to load error details",
+                        );
+                      } finally {
+                        setDetailsLoading(false);
+                      }
+                    }}
+                    className="w-full rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4 text-left transition hover:bg-white hover:border-[#ff4d6d]"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-[#31101e]">
+                          {log.message || log.error || "Error"}
                         </p>
-                        <p className="mt-3 text-sm leading-relaxed text-white">
-                          {selectedError.message ||
-                            selectedError.error ||
-                            "No message available"}
-                        </p>
-                      </div>
-
-                      <div className="grid gap-3">
-                        <DetailRow
-                          label="Source"
-                          value={
-                            selectedError.source || selectedError.module || "-"
-                          }
-                        />
-                        <DetailRow
-                          label="Code"
-                          value={
-                            selectedError.code || selectedError.errorCode || "-"
-                          }
-                        />
-                        <DetailRow
-                          label="Status"
-                          value={
-                            selectedError.status || selectedError.level || "-"
-                          }
-                        />
-                        <DetailRow
-                          label="Timestamp"
-                          value={formatDateTime(
-                            selectedError.createdAt ||
-                              selectedError.timestamp ||
-                              selectedError.date,
+                        <p className="mt-1 text-sm text-[#7c4a5e]">
+                          {formatDateTime(
+                            log.createdAt || log.timestamp || log.date,
                           )}
-                        />
-                        <DetailRow
-                          label="Stack"
-                          value={
-                            selectedError.stack || selectedError.trace || "-"
-                          }
-                          multiline
-                        />
+                        </p>
                       </div>
+
+                      <span className="rounded-full border border-red-300 bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                        {log.level || "error"}
+                      </span>
                     </div>
-                  )}
+                  </button>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                  No error logs found.
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Selected error detail */}
+          <div className="rounded-3xl border border-[#ffe0e8] bg-white/90 p-6 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-xs uppercase tracking-[0.4em] text-[#1e5aa8]">
+                  Selected log
+                </p>
+                <h3 className="mt-2 text-2xl font-semibold text-[#31101e]">
+                  Details
+                </h3>
               </div>
-            </aside>
-          </section>
-        </main>
+              <Eye className="h-6 w-6 text-[#1e5aa8]" />
+            </div>
+
+            <div className="mt-6">
+              {!selectedError ? (
+                <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-6 text-center text-[#7c4a5e]">
+                  Click an error log to inspect details.
+                </div>
+              ) : detailsLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 4 }).map((_, idx) => (
+                    <div
+                      key={idx}
+                      className="animate-pulse rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4"
+                    >
+                      <div className="h-3 w-28 rounded bg-[#ffe0e8]" />
+                      <div className="mt-2 h-4 w-full rounded bg-[#ffe0e8]" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-5">
+                    <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
+                      Message
+                    </p>
+                    <p className="mt-3 text-sm leading-relaxed text-[#31101e]">
+                      {selectedError.message ||
+                        selectedError.error ||
+                        "No message available"}
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3">
+                    <DetailRow
+                      label="Source"
+                      value={
+                        selectedError.source || selectedError.module || "-"
+                      }
+                    />
+                    <DetailRow
+                      label="Code"
+                      value={
+                        selectedError.code || selectedError.errorCode || "-"
+                      }
+                    />
+                    <DetailRow
+                      label="Status"
+                      value={selectedError.status || selectedError.level || "-"}
+                    />
+                    <DetailRow
+                      label="Timestamp"
+                      value={formatDateTime(
+                        selectedError.createdAt ||
+                          selectedError.timestamp ||
+                          selectedError.date,
+                      )}
+                    />
+                    <DetailRow
+                      label="Stack"
+                      value={selectedError.stack || selectedError.trace || "-"}
+                      multiline
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
       </div>
-    </div>
+    </section>
   );
 }
 
 function StatBox({ label, value, color }) {
   return (
-    <div className="rounded-[24px] border border-white/10 bg-white/5 p-5">
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className={`mt-2 text-3xl font-black ${color}`}>{value}</p>
-      <p className="mt-1 text-xs text-gray-500">Services</p>
+    <div className="rounded-2xl border border-[#ffe0e8] bg-white/90 p-5 shadow-[0_20px_45px_rgba(255,122,149,0.12)]">
+      <p className="text-xs text-[#7c4a5e]">{label}</p>
+      <p className={`mt-2 text-3xl font-semibold ${color}`}>{value}</p>
+      <p className="mt-1 text-xs text-[#a44255]">Services</p>
     </div>
   );
 }
 
 function DetailRow({ label, value, multiline = false }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4">
-      <p className="text-xs uppercase tracking-[0.2em] text-gray-400">
+    <div className="rounded-2xl border border-[#ffe0e8] bg-[#fff7f9] p-4">
+      <p className="text-xs uppercase tracking-[0.2em] text-[#7c4a5e]">
         {label}
       </p>
       <p
-        className={`mt-2 text-sm font-semibold text-white ${
+        className={`mt-2 text-sm font-semibold text-[#31101e] ${
           multiline ? "whitespace-pre-wrap break-words" : "break-words"
         }`}
       >
